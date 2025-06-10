@@ -116,7 +116,8 @@ body {
     padding: .75rem 1.5rem;
     background-color: #1e88e5;
     background-image: linear-gradient(to top right,#1e88e5,#42a5f5);
-    border-radius: .5rem;
+    border-radius: 0.75rem;
+    margin: 10px;
     width: 100%;
     outline: 0;
     border: 0;
