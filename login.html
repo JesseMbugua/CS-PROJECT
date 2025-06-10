@@ -7,13 +7,13 @@
     <link rel="stylesheet" href="login-signup.css">
 </head>
 <body>
-<form class="form">
+<form class="form" id ="loginForm">
     <div class="header">Login</div>
     <div class="inputs">
-        <input placeholder="Email" class="input" type="text">
-        <input placeholder="Password" class="input" type="password">
+        <input id = "email" placeholder="Email" class="input" type="text" name="email">
+        <input id = "password" placeholder="Password" class="input" type="password" name="password">
     <div class="checkbox-container">
-        <label class="checkbox">
+        <label class="checkbox"> 
         <input type="checkbox" id="checkbox">
         </label>
         <label for="checkbox" class="checkbox-text">Remember me</label>
@@ -23,6 +23,6 @@
     <p class="signup-link">Don't have an account? <a href="signup.html">Sign up</a></p>
     </div>
 </form>
-  
+  <script src="login.js"></script>
 </body>
 </html>
