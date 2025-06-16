@@ -25,19 +25,23 @@ const pool = new Pool({
   port: 5432,                
 });
 
+const bcrypt = require('bcrypt');
+
 // signup POST request
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
   try {
-    // Insert the new user into the database
+    // Password hashed
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert the new user into the database with the hashed password
     await pool.query(
       'INSERT INTO users (email, password) VALUES ($1, $2)',
-      [email, password]
+      [email, hashedPassword]
     );
-    //Send a success response
+
     res.json({ success: true, message: 'Signup successful!' });
   } catch (err) {
-    //error logged and sends error response
     console.error(err);
     res.status(500).json({ success: false, message: 'Signup failed.' });
   }
@@ -47,21 +51,24 @@ app.post('/signup', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-    try {
-      // check if the user exists in the database
+  try {
+    // Get the user by email
     const result = await pool.query(
-      'SELECT * FROM users WHERE email=$1 AND password=$2',
-      [email, password]
+      'SELECT * FROM users WHERE email=$1',
+      [email]
     );
-    //Log the query to see the result I use it for debugging
-    console.log('Query result:', result.rows); 
 
     if (result.rows.length > 0) {
-      //If the user exists send success response
-      res.json({ success: true, message: 'Login successful!' });
+      const user = result.rows[0];
+      // Compare the hashed password
+      const match = await bcrypt.compare(password, user.password);
+      if (match) {
+        res.json({ success: true, message: 'Login successful!' });
+      } else {
+        res.json({ success: false, message: 'Invalid login' });
+      }
     } else {
-      //If user does not exist send error response
-      res.json({ success: false, message: 'Invalid login u bot' });
+      res.json({ success: false, message: 'Invalid login' });
     }
   } catch (err) {
     console.error(err);
