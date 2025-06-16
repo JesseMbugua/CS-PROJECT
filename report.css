@@ -1,0 +1,62 @@
+.report-card {
+  width: 300px;
+  background: #e4e4e4;
+  box-shadow: 10px 10px 20px #afafaf, -10px -10px 20px #ffffff;
+  padding: 20px;
+  border-radius: 15px;
+  font-family: Sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: auto;
+}
+
+.report-card h2 {
+  text-align: center;
+  font-size: 20px;
+  color: #333;
+}
+
+.report-card label {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.report-card input[type="file"],
+.report-card input[type="text"],
+.report-card textarea {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #d4d4d4;
+  box-shadow: inset 5px 5px 10px #bfbfbf, inset -5px -5px 10px #f1f1f1;
+  font-family: Sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+.report-card textarea {
+  resize: none;
+  height: 80px;
+}
+
+.report-card button {
+  padding: 10px;
+  font-size: 16px;
+  font-family: Sans-serif;
+  border: none;
+  border-radius: 11px;
+  color: #fff;
+  background-size: 200% 100%;
+  background-image: linear-gradient(145deg, #ff00e1, #0000ff, #00d9ff);
+  transition: background-position 0.3s ease-out, transform 0.2s ease;
+  box-shadow: 0px 4px 8px #bbb;
+  cursor: pointer;
+}
+
+.report-card button:hover {
+  background-position: 99%;
+  transform: translateY(-3px);
+}

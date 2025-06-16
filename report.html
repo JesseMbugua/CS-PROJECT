@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Illegal Dumping</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+<div class="report-card" style="max-width: 500px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 10px; font-family: Arial;">
+  <h2 style="text-align: center;">Report Illegal Dumping</h2>
+  <label for="photo">Upload a Photo:</label><br>
+  <input type="file" id="photo" name="photo" accept="image/*" style="margin-bottom: 15px; width: 100%;"><br>
+  <label for="location">Location of Incident:</label><br>
+  <input type="text" id="location" name="location" placeholder="e.g. Near Riverbank, Market area" style="width: 100%; padding: 8px; margin-bottom: 15px;"><br>
+  <label for="description">Describe What You Saw:</label><br>
+  <textarea id="description" name="description" placeholder="Briefly describe the dumping incident..." rows="5" style="width: 100%; padding: 8px; margin-bottom: 20px;"></textarea><br>
+  <button style="background-color: #007BFF; color: white; padding: 10px 20px; border: none; border-radius: 5px; width: 100%;">
+    Submit Report
+  </button>
+</div>
+
+</body>
+</html>
