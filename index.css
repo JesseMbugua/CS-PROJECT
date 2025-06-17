@@ -1,0 +1,106 @@
+body, ul {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+header {
+  background-color: #002a54ef;
+  color: #fff;
+  padding: 25px 20px;
+  text-align: center;
+  position: relative;
+}
+
+header h1 {
+  margin: 0;
+  text-shadow: 5px 3px 5px rgb(0, 0, 0);
+  font-size: 2.5rem;
+}
+
+nav {
+  background-color: rgba(40, 39, 39, 0.8);
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+nav ul {
+  list-style: none;
+  text-align: center;
+}
+
+nav ul li {
+  display: inline-block;
+  margin: 0 15px;
+}
+
+.nav-class a {
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 15px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-class a:hover {
+  text-decoration: underline;
+  background-color: #02356cc1;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+section#hero {
+  padding: 60px 20px;
+  text-align: center;
+  background: linear-gradient(#e3f2fd, #ffffff);
+}
+
+#hero h2 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+#hero p {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.btn {
+  display: inline-block;
+  background-color: #0b6ed1ef;
+  color: white;
+  text-decoration: none;
+  padding: 12px 18px;
+  margin: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #084a9b;
+}
+
+/* Optional: welcome text typing animation */
+#welcome-text {
+  width: 55%;
+  overflow: hidden;
+  display: inline-block;
+  border-right: 1px solid #000;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 4px;
+  animation: typing 4.5s steps(40, end);
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 55%; }
+}
+
