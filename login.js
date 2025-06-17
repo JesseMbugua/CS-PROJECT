@@ -28,12 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       //JSON response from the server
       const result = await response.json();
-      alert(result.message);
-
+      if (result.success) {
+        window.location.href = 'index.html'; // Redirect to homepage
+      } else {
+        alert(result.message);
+      }
     } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again.');
+      alert('An error occurred during login.');
     }
-  });
+
+  }); 
 
 });
