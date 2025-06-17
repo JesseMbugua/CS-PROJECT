@@ -25,6 +25,21 @@ const pool = new Pool({
   port: 5432,                
 });
 
+const multer = require('multer');
+
+//multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, 'uploads')); // Make sure the folder exists
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+
+
+const upload = multer({ storage: storage });
 const bcrypt = require('bcrypt');
 
 // signup POST request
@@ -76,6 +91,22 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// Handle report submissions
+app.post('/report', upload.single('photo'), async (req, res) => {
+  const { location, description } = req.body;
+  const photo_url = req.file ? '/uploads/' + req.file.filename : null;
+
+  try {
+    await pool.query(
+      'INSERT INTO reports (photo_url, location, description) VALUES ($1, $2, $3)',
+      [photo_url, location, description]
+    );
+    res.json({ success: true, message: 'Report submitted!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to submit report.' });
+  }
+});
 
 // Start server
 app.listen(3000, () => {
