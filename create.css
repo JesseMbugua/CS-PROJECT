@@ -1,31 +1,45 @@
-.report-card {
-  width: 300px;
+body {
+  background: linear-gradient(135deg, #f0f0f0, #d4d4d4);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px; 
+}
+
+.create-event-card {
+  width: 320px;
   background: #e4e4e4;
   box-shadow: 10px 10px 20px #afafaf, -10px -10px 20px #ffffff;
-  padding: 20px;
+  padding: 30px;
   border-radius: 15px;
   font-family: Sans-serif;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  margin: auto;
+  margin: 40px auto;
 }
 
-.report-card h2 {
+.create-event-card h1 {
   text-align: center;
-  font-size: 20px;
+  font-size: 22px;
   color: #333;
 }
 
-.report-card label {
+.create-event-card label {
   font-size: 14px;
   color: #333;
   margin-bottom: 5px;
 }
 
-.report-card input[type="file"],
-.report-card input[type="text"],
-.report-card textarea {
+.create-event-card input[type="text"],
+.create-event-card input[type="date"],
+.create-event-card input[type="time"],
+.create-event-card input[type="file"] {
   width: 100%;
   padding: 10px;
   border: none;
@@ -37,12 +51,7 @@
   color: #333;
 }
 
-.report-card textarea {
-  resize: none;
-  height: 80px;
-}
-
-.report-card button {
+.create-event-card button {
   padding: 10px;
   font-size: 16px;
   font-family: Sans-serif;
@@ -56,7 +65,8 @@
   cursor: pointer;
 }
 
-.report-card button:hover {
+.create-event-card button:hover {
   background-position: 99%;
   transform: translateY(-3px);
+
 }
