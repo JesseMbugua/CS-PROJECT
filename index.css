@@ -1,6 +1,9 @@
-body, ul {
+* {
   margin: 0;
   padding: 0;
+  list-style: none;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 body {
@@ -9,50 +12,95 @@ body {
   color: #333;
 }
 
-header {
+input[type="checkbox"] {
+  display: none;
+}
+
+label #btn, label #cancel {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 2000;
+  background-color: #042331;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: 0.4s;
+}
+
+label #cancel {
+  left: -9999px; 
+}
+
+#check:checked ~ label #btn {
+  left: -9999px;
+}
+
+#check:checked ~ label #cancel {
+  left: 20px;
+}
+
+.sidebar {
+  position: fixed;
+  left: -250px;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  background: #042331;
+  transition: all .5s ease;
+  z-index: 1000;
+}
+
+#check:checked ~ .sidebar {
+  left: 0;
+}
+
+.sidebar header {
+  font-size: 22px;
+  color: white;
+  text-align: center;
+  line-height: 70px;
+  background: #063146;
+  user-select: none;
+}
+
+.sidebar ul a {
+  display: block;
+  height: 100%;
+  width: 100%;
+  line-height: 65px;
+  font-size: 20px;
+  color: #fff;
+  padding-left: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid black;
+  transition: .4s;
+}
+
+.sidebar ul li:hover a {
+  padding-left: 50px;
+  background-color: #0a5275;
+}
+
+.sidebar ul a i {
+  margin-right: 16px;
+}
+
+.main-header {
   background-color: #002a54ef;
   color: #fff;
   padding: 25px 20px;
   text-align: center;
   position: relative;
+  z-index: 1;
 }
 
-header h1 {
+.main-header h1 {
   margin: 0;
   text-shadow: 5px 3px 5px rgb(0, 0, 0);
   font-size: 2.5rem;
-}
-
-nav {
-  background-color: rgba(40, 39, 39, 0.8);
-  padding: 12px 0;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-nav ul {
-  list-style: none;
-  text-align: center;
-}
-
-nav ul li {
-  display: inline-block;
-  margin: 0 15px;
-}
-
-.nav-class a {
-  color: #fff;
-  text-decoration: none;
-  padding: 10px 15px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.nav-class a:hover {
-  text-decoration: underline;
-  background-color: #02356cc1;
-  border-radius: 8px;
-  font-weight: bold;
 }
 
 section#hero {
@@ -86,21 +134,3 @@ section#hero {
 .btn:hover {
   background-color: #084a9b;
 }
-
-/* Optional: welcome text typing animation */
-#welcome-text {
-  width: 55%;
-  overflow: hidden;
-  display: inline-block;
-  border-right: 1px solid #000;
-  white-space: nowrap;
-  margin: 0 auto;
-  letter-spacing: 4px;
-  animation: typing 4.5s steps(40, end);
-}
-
-@keyframes typing {
-  from { width: 0; }
-  to { width: 55%; }
-}
-
