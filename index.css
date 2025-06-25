@@ -8,8 +8,9 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  color: #333;
+  background: url('/images/sigmund-aI4RJ--Mw4I-unsplash.jpg');
+  background-size: cover;
+  color: #ffffff;
 }
 
 input[type="checkbox"] {
@@ -106,7 +107,7 @@ label #cancel {
 section#hero {
   padding: 60px 20px;
   text-align: center;
-  background: linear-gradient(#e3f2fd, #ffffff);
+  background: transparent;
 }
 
 #hero h2 {
@@ -133,4 +134,60 @@ section#hero {
 
 .btn:hover {
   background-color: #084a9b;
+}
+
+#about {
+  padding: 60px 20px;
+  text-align: center;
+  background: transparent;
+}
+
+#about h2 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+#about p {
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin: 10px auto;
+  line-height: 1.6;
+}
+
+#contact {
+  padding: 60px 20px;
+  text-align: center;
+  background-color: transparent;
+}
+
+#contact a {
+  color: #ec0707ef;
+}
+
+#contact h2 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+#contact p {
+  font-size: 1.1rem;
+  margin: 8px 0;
+}
+
+footer {
+  background-color: #002a54ef;
+  color: white;
+  text-align: center;
+  padding: 25px 20px;
+}
+
+footer a {
+  color: white;
+  margin: 0 10px;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+footer a:hover {
+  color: #a9d6ff;
 }
