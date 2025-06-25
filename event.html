@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cleanup Events</title>
+  <link rel="stylesheet" href="event.css"/>
+</head>
+<body>
+  <header>
+    <h1>View Events</h1>
+  </header>
+
+  <main class="feed" id="events-container">
+    <!-- Event posts will load here -->
+  </main>
+
+  <script>
+    let offset = 0;
+    const limit = 5;
+    let loading = false;
+
+    async function loadEvents() {
+      if (loading) return;
+      loading = true;
+
+      const res = await fetch(`http://localhost:3000/api/events?limit=${limit}&offset=${offset}`);
+      const events = await res.json();
+
+      const container = document.getElementById('events-container');
+      events.forEach(event => {
+        container.innerHTML += `
+          <div class="post">
+            <div class="post-header">
+              <img src="${event.profile_image}" class="avatar" alt="Organizer">
+              <span class="username">${event.organizer}</span>
+            </div>
+            <img src="${event.event_image}" class="post-image" alt="Event Image">
+            <div class="post-body">
+              <h2>${event.title}</h2>
+              <p>${event.description}</p>
+              <div class="meta">
+                <span>📍 ${event.location}</span>
+                <span>📅 ${new Date(event.event_date).toDateString()}</span>
+              </div>
+              <button class="join-btn" onclick="joinEvent(${event.id})">Join Event</button>
+            </div>
+          </div>
+        `;
+      });
+
+      if (events.length > 0) {
+        offset += limit;
+      }
+
+      loading = false;
+    }
+
+    // Infinite scroll
+    window.addEventListener('scroll', () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+        loadEvents();
+      }
+    });
+
+    function joinEvent(eventId) {
+      alert("You've joined event ID: " + eventId);
+      // You can send a POST request to the backend here
+    }
+
+    loadEvents();
+  </script>
+</body>
+</html>
