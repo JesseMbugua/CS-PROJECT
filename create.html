@@ -25,10 +25,14 @@
       <input type="time" id="eventTime" name="eventTime" required>
     </div>
 
-    <div class="form-group">
-      <label for="eventLocation">Event Location:</label>
-      <input type="text" id="eventLocation" name="eventLocation" required>
-    </div>
+   <div class="form-group">
+  <label for="search">Search for a place:</label><br>
+  <input type="text" id="search" placeholder="Enter a place or address" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+  <button type="button" id="searchBtn" style="margin-bottom: 15px; width: 100%;">Search</button>
+  <small style="color: #555;">Click on the map to select the event location.</small>
+  <div id="map" style="height: 300px; margin-bottom: 15px; border-radius: 8px;"></div>
+  <input type="hidden" id="eventLocation" name="eventLocation" required>
+</div>
 
     <div class="form-group">
       <label for="eventImage">Upload Image of Place to Clean:</label>
@@ -38,7 +42,12 @@
     <button type="submit">Create Event</button>
   </form>
 </div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
+<script src="create.js">
+
+</script>
 
 </body>
 </html>

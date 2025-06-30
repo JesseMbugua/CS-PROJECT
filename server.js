@@ -13,8 +13,7 @@ app.use(bodyParser.json());
 //communication with the frontend and backend
 app.use(cors());
 
-//The directory that has server.js
-app.use(express.static(__dirname));
+
 
 //Our database connection
 const pool = new Pool({
@@ -106,11 +105,30 @@ app.post('/report', upload.single('photo'), async (req, res) => {
     );
     res.json({ success: true, message: 'Report submitted!' });
   } catch (err) {
-    console.error(err); // <-- Check this output!
+    console.error(err); // <-- Check this output
     res.status(500).json({ success: false, message: 'Failed to submit report.' });
   }
 });
 
+// andles event creation
+app.post('/create-event', upload.single('eventImage'), async (req, res) => {
+  const { eventName, eventDate, eventTime, eventLocation } = req.body;
+  const eventImageUrl = req.file ? '/uploads/' + req.file.filename : null;
+
+  try {
+    await pool.query(
+      'INSERT INTO events (event_name, event_date, event_time, event_location, event_image_url) VALUES ($1, $2, $3, $4, $5)',
+      [eventName, eventDate, eventTime, eventLocation, eventImageUrl]
+    );
+    res.redirect('/event.html'); 
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Failed to create event.');
+  }
+});
+
+//The directory that has server.js
+app.use(express.static(__dirname));
 // Start server
 app.listen(3000, () => {
   console.log('Server running at http://localhost:3000');
