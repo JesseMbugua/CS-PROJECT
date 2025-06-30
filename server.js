@@ -92,19 +92,21 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
+
 // Handle report submissions
 app.post('/report', upload.single('photo'), async (req, res) => {
-  const { location, description } = req.body;
+  const { address, description } = req.body;
   const photo_url = req.file ? '/uploads/' + req.file.filename : null;
 
   try {
     await pool.query(
-      'INSERT INTO reports (photo_url, location, description) VALUES ($1, $2, $3)',
-      [photo_url, location, description]
+      'INSERT INTO reports (photo_url, address, description) VALUES ($1, $2, $3)',
+      [photo_url, address, description]
     );
     res.json({ success: true, message: 'Report submitted!' });
   } catch (err) {
-    console.error(err);
+    console.error(err); // <-- Check this output!
     res.status(500).json({ success: false, message: 'Failed to submit report.' });
   }
 });

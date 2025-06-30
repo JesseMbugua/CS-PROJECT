@@ -5,40 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Illegal Dumping</title>
     <link rel="stylesheet" href="report.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+      #map { height: 300px; margin-bottom: 15px; border-radius: 8px; }
+    </style>
 </head>
-<body>
 <body>
 <div class="report-card" style="max-width: 500px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 10px; font-family: Arial;">
   <h2 style="text-align: center;">Report Illegal Dumping</h2>
   <form id="reportForm" enctype="multipart/form-data">
-    <label for="photo">Upload a Photo:</label><br>
-    <input type="file" id="photo" name="photo" accept="image/*" style="margin-bottom: 15px; width: 100%;"><br>
-    <label for="location">Location of Incident:</label><br>
-    <input type="text" id="location" name="location" placeholder="e.g. Near Riverbank, Market area" style="width: 100%; padding: 8px; margin-bottom: 15px;"><br>
-    <label for="description">Describe What You Saw:</label><br>
-    <textarea id="description" name="description" placeholder="Briefly describe the dumping incident..." rows="5" style="width: 100%; padding: 8px; margin-bottom: 20px;"></textarea><br>
-    <button type="submit" style="background-color: #007BFF; color: white; padding: 10px 20px; border: none; border-radius: 5px; width: 100%;">
-      Submit Report
-    </button>
-  </form>
+  <label for="photo">Upload a Photo:</label><br>
+  <input type="file" id="photo" name="photo" accept="image/*" style="margin-bottom: 15px; width: 100%;"><br>
+  <input type="hidden" id="address" name="address">
+  <label for="search">Search for a place:</label><br>
+<input type="text" id="search" placeholder="Enter a place or address" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+<button type="button" id="searchBtn" style="margin-bottom: 15px; width: 100%;">Search</button>
+  <small style="color: #555;">Click on the map to select the location of the incident.</small>
+  <div id="map"></div>
+<input type="hidden" id="address" name="address">
+<label for="description">Describe What You Saw:</label><br>
+  <textarea id="description" name="description" placeholder="Briefly describe the dumping incident..." rows="5" style="width: 100%; padding: 8px; margin-bottom: 20px;"></textarea><br>
+  <button type="submit" style="background-color: #007BFF; color: white; padding: 10px 20px; border: none; border-radius: 5px; width: 100%;">
+    Submit Report
+  </button>
+</form>
+
 </div>
-<script>
-document.getElementById('reportForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
-
-  const response = await fetch('/report', {
-    method: 'POST',
-    body: formData
-  });
-
-  const result = await response.json();
-  alert(result.message);
-  if(result.success) {
-    form.reset();
-  }
-});
+<script src="report.js">
 </script>
 </body>
 </html>
