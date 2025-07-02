@@ -36,6 +36,16 @@ map.on('click', function(e) {
     });
 });
 
+// Set the minimum date to today for the eventDate input
+document.addEventListener('DOMContentLoaded', function() {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const minDate = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('eventDate').setAttribute('min', minDate);
+});
+
 // Handle place search using Nominatim when the search button is clicked
 document.getElementById('searchBtn').addEventListener('click', function() {
   const query = document.getElementById('search').value.trim();
