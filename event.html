@@ -16,59 +16,42 @@
   </main>
 
   <script>
-    let offset = 0;
-    const limit = 5;
-    let loading = false;
+ let limit = 10;      // Number of events to load per request
+let offset = 0;      // Start at the first event
+let loading = false; // Prevent multiple loads
 
-    async function loadEvents() {
-      if (loading) return;
-      loading = true;
+async function loadEvents() {
+  if (loading) return;
+  loading = true;
 
-      const res = await fetch(`http://localhost:3000/api/events?limit=${limit}&offset=${offset}`);
-      const events = await res.json();
+  const res = await fetch(`/api/events?limit=${limit}&offset=${offset}`);
+  const events = await res.json();
 
-      const container = document.getElementById('events-container');
-      events.forEach(event => {
-        container.innerHTML += `
-          <div class="post">
-            <div class="post-header">
-              <img src="${event.profile_image}" class="avatar" alt="Organizer">
-              <span class="username">${event.organizer}</span>
-            </div>
-            <img src="${event.event_image}" class="post-image" alt="Event Image">
-            <div class="post-body">
-              <h2>${event.title}</h2>
-              <p>${event.description}</p>
-              <div class="meta">
-                <span>📍 ${event.location}</span>
-                <span>📅 ${new Date(event.event_date).toDateString()}</span>
-              </div>
-              <button class="join-btn" onclick="joinEvent(${event.id})">Join Event</button>
-            </div>
+  const container = document.getElementById('events-container');
+  events.forEach(event => {
+    container.innerHTML += `
+      <div class="post">
+        <img src="${event.event_image_url ? event.event_image_url : 'default-event.png'}" class="post-image" alt="Event Image">
+        <div class="post-body">
+          <h2>${event.event_name}</h2>
+          <div class="meta">
+            <span>📍 ${event.event_location}</span>
+            <span>📅 ${event.event_date} ${event.event_time ? '⏰ ' + event.event_time : ''}</span>
           </div>
-        `;
-      });
+        </div>
+      </div>
+    `;
+  });
 
-      if (events.length > 0) {
-        offset += limit;
-      }
+  if (events.length > 0) {
+    offset += limit;
+  }
 
-      loading = false;
-    }
+  loading = false;
+}
 
-    // Infinite scroll
-    window.addEventListener('scroll', () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-        loadEvents();
-      }
-    });
-
-    function joinEvent(eventId) {
-      alert("You've joined event ID: " + eventId);
-      // You can send a POST request to the backend here
-    }
-
-    loadEvents();
+// Call loadEvents when the page loads
+window.onload = loadEvents;
   </script>
 </body>
 </html>

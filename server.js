@@ -110,7 +110,7 @@ app.post('/report', upload.single('photo'), async (req, res) => {
   }
 });
 
-// andles event creation
+//handles event creation
 app.post('/create-event', upload.single('eventImage'), async (req, res) => {
   const { eventName, eventDate, eventTime, eventLocation } = req.body;
   const eventImageUrl = req.file ? '/uploads/' + req.file.filename : null;
@@ -124,6 +124,22 @@ app.post('/create-event', upload.single('eventImage'), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Failed to create event.');
+  }
+});
+
+// API endpoint to get events with pagination
+app.get('/api/events', async (req, res) => {
+  const limit = parseInt(req.query.limit) || 5;
+  const offset = parseInt(req.query.offset) || 0;
+  try {
+    const result = await pool.query(
+      'SELECT id, event_name, event_date, event_time, event_location, event_image_url FROM events ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+      [limit, offset]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch events.' });
   }
 });
 
