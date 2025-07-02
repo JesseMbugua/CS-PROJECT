@@ -5,23 +5,24 @@ body {
   justify-content: center;
   align-items: center;
 }
+
 .form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px; 
+  margin-bottom: 8px; 
 }
 
 .create-event-card {
-  width: 320px;
+  width: 640px; 
   background: #e4e4e4;
   box-shadow: 10px 10px 20px #afafaf, -10px -10px 20px #ffffff;
-  padding: 30px;
+  padding: 10px 40px; 
   border-radius: 15px;
   font-family: Sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin: 40px auto;
+  gap: 8px; 
+  margin: 30px auto; 
 }
 
 .create-event-card h1 {
@@ -51,6 +52,14 @@ body {
   color: #333;
 }
 
+.create-event-card input[type="text"]:focus,
+.create-event-card input[type="date"]:focus,
+.create-event-card input[type="time"]:focus,
+.create-event-card input[type="file"]:focus {
+  outline: none;
+  box-shadow: inset 7px 7px 12px #bfbfbf, inset -7px -7px 12px #f1f1f1;
+}
+
 .create-event-card button {
   padding: 10px;
   font-size: 16px;
@@ -68,5 +77,54 @@ body {
 .create-event-card button:hover {
   background-position: 99%;
   transform: translateY(-3px);
+}
 
+.create-event-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.create-event-card button:disabled:hover {
+  background-position: 0%;
+  transform: none;
+}
+
+#map {
+  background: #d4d4d4;
+  box-shadow: inset 5px 5px 10px #bfbfbf, inset -5px -5px 10px #f1f1f1;
+}
+
+#search {
+  border: none !important;
+  border-radius: 10px !important;
+  background: #d4d4d4 !important;
+  box-shadow: inset 5px 5px 10px #bfbfbf, inset -5px -5px 10px #f1f1f1 !important;
+  font-family: Sans-serif !important;
+  font-size: 14px !important;
+  color: #333 !important;
+}
+
+#search:focus {
+  outline: none !important;
+  box-shadow: inset 7px 7px 12px #bfbfbf, inset -7px -7px 12px #f1f1f1 !important;
+}
+
+#searchBtn {
+  padding: 10px !important;
+  font-size: 16px !important;
+  font-family: Sans-serif !important;
+  border: none !important;
+  border-radius: 11px !important;
+  color: #fff !important;
+  background-size: 200% 100% !important;
+  background-image: linear-gradient(145deg, #0012ff, #00ff36, #00ff00) !important;
+  transition: background-position 0.3s ease-out, transform 0.2s ease !important;
+  box-shadow: 0px 4px 8px #bbb !important;
+  cursor: pointer !important;
+}
+
+#searchBtn:hover {
+  background-position: 99% !important;
+  transform: translateY(-3px) !important;
 }
