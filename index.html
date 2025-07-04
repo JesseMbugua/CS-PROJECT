@@ -21,6 +21,13 @@
       <li><a href="event.html"><i class="fas fa-calendar-alt"></i> Events</a></li>
       <li><a href="create.html"><i class="fas fa-plus"></i> Create Event</a></li>
       <li><a href="report.html"><i class="fas fa-exclamation-triangle"></i> Report</a></li>
+      <li>
+  <form id="logoutForm" style="margin:0;">
+    <button type="submit" style="background:none;border:none;color:#007BFF;cursor:pointer;width:100%;text-align:left;padding:10px 0 10px 40px;">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+  </form>
+</li>
     </ul>
   </div>
 
@@ -58,5 +65,12 @@
   </p>
 </footer>
 
+<script>
+document.getElementById('logoutForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  await fetch('/logout', { method: 'POST', credentials: 'include' });
+  window.location.href = 'login.html';
+});
+</script>
 </body>
 </html>

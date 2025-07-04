@@ -101,6 +101,13 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie('connect.sid');
+    res.json({ success: true });
+  });
+});
+
 
 // Handle report submissions
 app.post('/report', upload.single('photo'), async (req, res) => {
