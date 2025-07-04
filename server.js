@@ -154,7 +154,7 @@ app.get('/api/events', async (req, res) => {
   const offset = parseInt(req.query.offset) || 0;
   try {
     const result = await pool.query(
-      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email
+      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating AS user_email
        FROM events
        JOIN users ON events.user_id = users.id
        ORDER BY events.created_at DESC
@@ -165,6 +165,54 @@ app.get('/api/events', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch events.' });
+  }
+});
+
+// User joins an event
+app.post('/api/events/:id/join', async (req, res) => {
+  const userId = req.session.userId;
+  const eventId = parseInt(req.params.id, 10);
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Not logged in' });
+  }
+
+  try {
+    // Try to insert participation
+    const result = await pool.query(
+      'INSERT INTO participating (event_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING id',
+      [eventId, userId]
+    );
+    // Only increment if a new row was inserted
+    if (result.rowCount > 0) {
+      await pool.query(
+        'UPDATE events SET number_participating = number_participating + 1 WHERE id = $1',
+        [eventId]
+      );
+      res.json({ success: true, message: 'Joined event!' });
+    } else {
+      res.json({ success: false, message: 'You have already joined this event.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to join event.' });
+  }
+});
+
+app.get('/api/events/:id/participants', async (req, res) => {
+  const eventId = parseInt(req.params.id, 10);
+  try {
+    const result = await pool.query(
+      `SELECT users.email
+       FROM participating
+       JOIN users ON participating.user_id = users.id
+       WHERE participating.event_id = $1`,
+      [eventId]
+    );
+    res.json(result.rows.map(row => row.email));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch participants.' });
   }
 });
 

@@ -7,9 +7,10 @@
   <link rel="stylesheet" href="event.css"/>
 </head>
 <body>
-  <header>
-    <h1>View Events</h1>
-  </header>
+  <header class="event-header">
+  <button class="home-btn" onclick="window.location.href='index.html'">Home</button>
+  <h1 class="event-title">View Events</h1>
+</header>
 
   <main class="feed" id="events-container">
     <!-- Event posts will load here -->
@@ -38,7 +39,9 @@ async function loadEvents() {
           <span>📍 ${event.event_location}</span>
           <span>📅 ${event.event_date} ${event.event_time ? '⏰ ' + event.event_time : ''}</span>
           <span>👤 ${event.user_email}</span>
+          <span>👥 ${event.number_participating || 0} joined</span>
         </div>
+        <button class="join-btn" data-event-id="${event.id}">Join Event</button>
       </div>
     </div>
   `;
@@ -50,7 +53,22 @@ async function loadEvents() {
 
   loading = false;
 }
-
+document.addEventListener('click', async function(e) {
+  if (e.target.classList.contains('join-btn')) {
+    const eventId = e.target.getAttribute('data-event-id');
+    const res = await fetch(`/api/events/${eventId}/join`, { method: 'POST', credentials: 'include' });
+    const result = await res.json();
+    if (result.success) {
+      alert('You have joined the event!');
+      // Reload events to update participant count
+      document.getElementById('events-container').innerHTML = '';
+      offset = 0;
+      loadEvents();
+    } else {
+      alert(result.message);
+    }
+  }
+});
 // Call loadEvents when the page loads
 window.onload = loadEvents;
   </script>
