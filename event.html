@@ -28,20 +28,21 @@ async function loadEvents() {
   const events = await res.json();
 
   const container = document.getElementById('events-container');
-  events.forEach(event => {
-    container.innerHTML += `
-      <div class="post">
-        <img src="${event.event_image_url ? event.event_image_url : 'default-event.png'}" class="post-image" alt="Event Image">
-        <div class="post-body">
-          <h2>${event.event_name}</h2>
-          <div class="meta">
-            <span>📍 ${event.event_location}</span>
-            <span>📅 ${event.event_date} ${event.event_time ? '⏰ ' + event.event_time : ''}</span>
-          </div>
+ events.forEach(event => {
+  container.innerHTML += `
+    <div class="post">
+      <img src="${event.event_image_url ? event.event_image_url : 'default-event.png'}" class="post-image" alt="Event Image">
+      <div class="post-body">
+        <h2>${event.event_name}</h2>
+        <div class="meta">
+          <span>📍 ${event.event_location}</span>
+          <span>📅 ${event.event_date} ${event.event_time ? '⏰ ' + event.event_time : ''}</span>
+          <span>👤 ${event.user_email}</span>
         </div>
       </div>
-    `;
-  });
+    </div>
+  `;
+});
 
   if (events.length > 0) {
     offset += limit;

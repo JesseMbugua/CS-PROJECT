@@ -41,6 +41,16 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const bcrypt = require('bcrypt');
 
+//track logged in user
+const session = require('express-session');
+app.use(session({
+  secret: '120c7d9700d6a6cdd8995cfa9d76928d559f99dd3bac352b127a08ef65014141', 
+  resave: false,
+  saveUninitialized: true
+}));
+
+
+
 // signup POST request
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
@@ -77,9 +87,9 @@ app.post('/login', async (req, res) => {
       // Compare the hashed password
       const match = await bcrypt.compare(password, user.password);
       if (match) {
-        // Send success response!
+        req.session.userId = user.id; // Save user ID in session
         return res.json({ success: true, message: 'Login successful!' });
-      } else {
+      }else {
         res.json({ success: false, message: 'Invalid login' });
       }
     } else {
@@ -90,7 +100,6 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
-
 
 
 // Handle report submissions
@@ -114,13 +123,18 @@ app.post('/report', upload.single('photo'), async (req, res) => {
 app.post('/create-event', upload.single('eventImage'), async (req, res) => {
   const { eventName, eventDate, eventTime, eventLocation } = req.body;
   const eventImageUrl = req.file ? '/uploads/' + req.file.filename : null;
+  const userId = req.session.userId; // Get user ID from session
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Not logged in' });
+  }
 
   try {
     await pool.query(
-      'INSERT INTO events (event_name, event_date, event_time, event_location, event_image_url) VALUES ($1, $2, $3, $4, $5)',
-      [eventName, eventDate, eventTime, eventLocation, eventImageUrl]
+      'INSERT INTO events (event_name, event_date, event_time, event_location, event_image_url, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+      [eventName, eventDate, eventTime, eventLocation, eventImageUrl, userId]
     );
-    res.redirect('/event.html'); 
+    res.redirect('/event.html');
   } catch (err) {
     console.error(err);
     res.status(500).send('Failed to create event.');
@@ -133,7 +147,11 @@ app.get('/api/events', async (req, res) => {
   const offset = parseInt(req.query.offset) || 0;
   try {
     const result = await pool.query(
-      'SELECT id, event_name, event_date, event_time, event_location, event_image_url FROM events ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email
+       FROM events
+       JOIN users ON events.user_id = users.id
+       ORDER BY events.created_at DESC
+       LIMIT $1 OFFSET $2`,
       [limit, offset]
     );
     res.json(result.rows);

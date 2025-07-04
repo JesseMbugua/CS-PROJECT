@@ -19,12 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       // Send the login data to the server using the Fetch API
       const response = await fetch('/login', {
-        method: 'POST', 
-        headers: {
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify(data) 
-      });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(data),
+  credentials: 'include' 
+});
 
       //JSON response from the server
       const result = await response.json();
