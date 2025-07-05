@@ -168,6 +168,27 @@ app.get('/api/events', async (req, res) => {
   }
 });
 
+app.get('/api/admin/events', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        events.id,
+        events.event_name, 
+        events.event_date, 
+        events.event_location,
+        COUNT(participating.id) AS volunteers
+      FROM events
+      LEFT JOIN participating ON events.id = participating.event_id
+      GROUP BY events.id, events.event_name, events.event_date, events.event_location
+      ORDER BY events.event_date DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch events.' });
+  }
+});
+
 // User joins an event
 app.post('/api/events/:id/join', async (req, res) => {
   const userId = req.session.userId;
@@ -213,6 +234,24 @@ app.get('/api/events/:id/participants', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch participants.' });
+  }
+});
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    const usersResult = await pool.query('SELECT COUNT(*) FROM users');
+    const upcomingResult = await pool.query('SELECT COUNT(*) FROM events WHERE event_date >= CURRENT_DATE');
+    const reportsResult = await pool.query('SELECT COUNT(*) FROM reports');
+    const completedResult = await pool.query('SELECT COUNT(*) FROM events WHERE event_date < CURRENT_DATE');
+
+    res.json({
+      totalUsers: parseInt(usersResult.rows[0].count, 10),
+      upcomingEvents: parseInt(upcomingResult.rows[0].count, 10),
+      reports: parseInt(reportsResult.rows[0].count, 10),
+      completedEvents: parseInt(completedResult.rows[0].count, 10)
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch stats.' });
   }
 });
 

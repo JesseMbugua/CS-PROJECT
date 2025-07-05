@@ -26,23 +26,23 @@
       </header>
 
       <section class="cards">
-        <div class="card">
-          <h3>Total Users</h3>
-          <p>234</p>
-        </div>
-        <div class="card">
-          <h3>Upcoming Events</h3>
-          <p>12</p>
-        </div>
-        <div class="card">
-          <h3>Reports</h3>
-          <p>6</p>
-        </div>
-        <div class="card">
-          <h3>Completed Events</h3>
-          <p>89</p>
-        </div>
-      </section>
+  <div class="card">
+    <h3>Total Users</h3>
+    <p id="total-users">0</p>
+  </div>
+  <div class="card">
+    <h3>Upcoming Events</h3>
+    <p id="upcoming-events">0</p>
+  </div>
+  <div class="card">
+    <h3>Reports</h3>
+    <p id="reports">0</p>
+  </div>
+  <div class="card">
+    <h3>Completed Events</h3>
+    <p id="completed-events">0</p>
+  </div>
+</section>
 
       <section class="table-section">
         <h2>Recent Events</h2>
@@ -56,28 +56,44 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Beach Cleanup</td>
-              <td>2025-07-05</td>
-              <td>Mombasa</td>
-              <td>54</td>
-            </tr>
-            <tr>
-              <td>Park Sweep</td>
-              <td>2025-07-12</td>
-              <td>Nairobi</td>
-              <td>30</td>
-            </tr>
-            <tr>
-              <td>River Rescue</td>
-              <td>2025-07-15</td>
-              <td>Kisumu</td>
-              <td>21</td>
-            </tr>
-          </tbody>
+  <!-- Events will be loaded here dynamically -->
+        </tbody>
         </table>
       </section>
     </main>
   </div>
+
+  <script>
+async function loadAdminEvents() {
+  const res = await fetch('/api/admin/events');
+  const events = await res.json();
+  const tbody = document.querySelector('.table-section tbody');
+  tbody.innerHTML = '';
+  events.forEach(event => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${event.event_name}</td>
+        <td>${event.event_date.split('T')[0]}</td>
+        <td>${event.event_location}</td>
+        <td>${event.volunteers}</td>
+      </tr>
+    `;
+  });
+}
+
+async function loadAdminStats() {
+  const res = await fetch('/api/admin/stats');
+  const stats = await res.json();
+  document.getElementById('total-users').textContent = stats.totalUsers;
+  document.getElementById('upcoming-events').textContent = stats.upcomingEvents;
+  document.getElementById('reports').textContent = stats.reports;
+  document.getElementById('completed-events').textContent = stats.completedEvents;
+}
+
+window.onload = () => {
+  loadAdminEvents();
+  loadAdminStats();
+};
+</script>
 </body>
 </html>
