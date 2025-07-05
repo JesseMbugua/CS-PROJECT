@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile</title>
+  <link rel="stylesheet" href="user.css" />
+</head>
+<body>
+
+  <div class="container">
+    <h1>User Profile</h1>
+
+    <section class="profile-section">
+      <h2>Update Profile</h2>
+      <form class="profile-form" enctype="multipart/form-data">
+        <div class="profile-pic-container">
+          <img src="default-avatar.png" alt="Profile Picture" id="profile-pic-preview">
+          <input type="file" id="profile-pic" accept="image/*">
+        </div>
+
+        <label>Full Name:</label>
+        <input type="text" placeholder="John Doe" />
+
+        <label>Email:</label>
+        <input type="email" placeholder="john@example.com" />
+
+        <label>Password:</label>
+        <input type="password" placeholder="********" />
+
+        <label>Bio:</label>
+        <textarea placeholder="Tell us something about you..."></textarea>
+
+        <button type="submit">Update Profile</button>
+      </form>
+    </section>
+
+    <section class="events-section">
+      <h2>My Created Events</h2>
+      <ul class="event-list">
+        <li>River Cleanup - July 10, 2025</li>
+        <li>Park Restoration - July 20, 2025</li>
+      </ul>
+    </section>
+
+    <section class="events-section">
+      <h2>Joined Upcoming Events</h2>
+      <ul class="event-list">
+        <li>Beach Sweep - August 5, 2025</li>
+        <li>Forest Debris Removal - August 15, 2025</li>
+      </ul>
+    </section>
+
+    <section class="extras">
+      <h2>Other Options</h2>
+      <ul class="extras-list">
+        <li><a href="#">Delete My Account</a></li>
+        <li><a href="#">Log Out</a></li>
+      </ul>
+    </section>
+
+  </div>
+
+  <script>
+    // Preview selected profile picture
+    document.getElementById("profile-pic").addEventListener("change", function(event) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        document.getElementById("profile-pic-preview").src = reader.result;
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    });
+  </script>
+
+</body>
+</html>
