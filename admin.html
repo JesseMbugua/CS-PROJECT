@@ -15,7 +15,6 @@
         <li>Manage Users</li>
         <li>Manage Events</li>
         <li>Reports</li>
-        <li>Statistics</li>
         <li>Logout</li>
       </ul>
     </aside>
@@ -64,10 +63,27 @@
   </div>
 
   <script>
+async function loadAdminStats() {
+  const res = await fetch('/api/admin/stats');
+  const stats = await res.json();
+  document.getElementById('total-users').textContent = stats.totalUsers;
+  document.getElementById('upcoming-events').textContent = stats.upcomingEvents;
+  document.getElementById('reports').textContent = stats.reports;
+  document.getElementById('completed-events').textContent = stats.completedEvents;
+}
+
 async function loadAdminEvents() {
   const res = await fetch('/api/admin/events');
   const events = await res.json();
   const tbody = document.querySelector('.table-section tbody');
+  const thead = document.querySelector('.table-section thead tr');
+  // Set table headers for events
+  thead.innerHTML = `
+    <th>Event</th>
+    <th>Date</th>
+    <th>Location</th>
+    <th>Volunteers</th>
+  `;
   tbody.innerHTML = '';
   events.forEach(event => {
     tbody.innerHTML += `
@@ -81,19 +97,28 @@ async function loadAdminEvents() {
   });
 }
 
-async function loadAdminStats() {
-  const res = await fetch('/api/admin/stats');
-  const stats = await res.json();
-  document.getElementById('total-users').textContent = stats.totalUsers;
-  document.getElementById('upcoming-events').textContent = stats.upcomingEvents;
-  document.getElementById('reports').textContent = stats.reports;
-  document.getElementById('completed-events').textContent = stats.completedEvents;
-}
 
-window.onload = () => {
+
+// Sidebar click handler
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('.sidebar ul').addEventListener('click', function(e) {
+    const text = e.target && e.target.textContent.trim();
+    if (text === 'Manage Users') {
+      document.querySelector('.table-section h2').textContent = 'All Users';
+      loadAdminUsers();
+    }
+    if (text === 'Manage Events' || text === 'Dashboard') {
+      document.querySelector('.table-section h2').textContent = 'Recent Events';
+      loadAdminEvents();
+    }
+    if (text === 'Reports') {
+      window.location.href = 'adminreport.html';
+    }
+  });
+  // Load events by default
   loadAdminEvents();
   loadAdminStats();
-};
+});
 </script>
 </body>
 </html>

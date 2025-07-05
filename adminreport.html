@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Reports - Street Cleanup</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <h2>Admin Panel</h2>
+      <ul>
+        <li><a href="admin.html">Dashboard</a></li>
+        <li><a href="admin.html">Manage Users</a></li>
+        <li><a href="admin.html">Manage Events</a></li>
+        <li class="active-dashboard">Reports</li>
+        <li><a href="login.html">Logout</a></li>
+      </ul>
+    </aside>
+    <main class="main-content">
+      <header>
+        <h1>All Reports</h1>
+      </header>
+      <section class="table-section">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Address</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="reports-tbody">
+            <!-- Reports will be loaded here -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  <script>
+    async function loadReports() {
+  const res = await fetch('/api/admin/reports');
+  const reports = await res.json();
+  const tbody = document.getElementById('reports-tbody');
+  tbody.innerHTML = '';
+  reports.forEach(report => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${report.id}</td>
+        <td>${report.address}</td>
+        <td>${report.description}</td>
+      </tr>
+    `;
+  });
+}
+    document.addEventListener('DOMContentLoaded', loadReports);
+  </script>
+</body>
+</html>

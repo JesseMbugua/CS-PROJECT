@@ -255,6 +255,27 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, email FROM users ORDER BY id');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch users.' });
+  }
+});
+
+app.get('/api/admin/reports', async (req, res) => {
+  console.log('GET /api/admin/reports called');
+  try {
+    const result = await pool.query('SELECT id, photo_url, address, description FROM reports ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch reports.' });
+  }
+});
+
 //The directory that has server.js
 app.use(express.static(__dirname));
 // Start server
