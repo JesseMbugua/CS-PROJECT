@@ -276,6 +276,16 @@ app.get('/api/admin/reports', async (req, res) => {
   }
 });
 
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT email FROM users ORDER BY id');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch users.' });
+  }
+});
+
 //The directory that has server.js
 app.use(express.static(__dirname));
 // Start server

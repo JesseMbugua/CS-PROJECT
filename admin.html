@@ -11,11 +11,9 @@
     <aside class="sidebar">
       <h2>Admin Panel</h2>
       <ul>
-        <li>Dashboard</li>
         <li>Manage Users</li>
         <li>Manage Events</li>
         <li>Reports</li>
-        <li>Logout</li>
       </ul>
     </aside>
 
@@ -104,8 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.sidebar ul').addEventListener('click', function(e) {
     const text = e.target && e.target.textContent.trim();
     if (text === 'Manage Users') {
-      document.querySelector('.table-section h2').textContent = 'All Users';
-      loadAdminUsers();
+      window.location.href = 'adminusers.html';
     }
     if (text === 'Manage Events' || text === 'Dashboard') {
       document.querySelector('.table-section h2').textContent = 'Recent Events';

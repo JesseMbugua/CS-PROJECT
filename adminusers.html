@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Reports - Street Cleanup</title>
+  <title>Admin Users - Street Cleanup</title>
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
@@ -17,19 +17,17 @@
     </aside>
     <main class="main-content">
       <header>
-        <h1>All Reports</h1>
+        <h1>All Users</h1>
       </header>
       <section class="table-section">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Address</th>
-              <th>Description</th>
+              <th>Email</th>
             </tr>
           </thead>
-          <tbody id="reports-tbody">
-            <!-- Reports will be loaded here -->
+          <tbody id="users-tbody">
+            <!-- Users will be loaded here -->
           </tbody>
         </table>
       </section>
@@ -45,22 +43,20 @@
     if (text === 'Logout') window.location.href = 'login.html';
   });
 });
-    async function loadReports() {
-  const res = await fetch('/api/admin/reports');
-  const reports = await res.json();
-  const tbody = document.getElementById('reports-tbody');
-  tbody.innerHTML = '';
-  reports.forEach(report => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${report.id}</td>
-        <td>${report.address}</td>
-        <td>${report.description}</td>
-      </tr>
-    `;
-  });
-}
-    document.addEventListener('DOMContentLoaded', loadReports);
+    async function loadUsers() {
+      const res = await fetch('/api/admin/users');
+      const users = await res.json();
+      const tbody = document.getElementById('users-tbody');
+      tbody.innerHTML = '';
+      users.forEach(user => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${user.email}</td>
+          </tr>
+        `;
+      });
+    }
+    document.addEventListener('DOMContentLoaded', loadUsers);
   </script>
 </body>
 </html>
