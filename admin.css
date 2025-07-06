@@ -122,3 +122,31 @@ tr:hover {
   text-decoration: underline;
   color: #007BFF; /* Optional: blue on hover */
 }
+
+.ban-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.ban-btn:hover {
+  background: #c0392b;
+}
+
+.unban-btn {
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.unban-btn:hover {
+  background: #219150;
+}

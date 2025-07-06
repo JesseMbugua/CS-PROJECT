@@ -49,11 +49,21 @@ app.use(session({
   saveUninitialized: true
 }));
 
-
-
+app.get('/api/admin/blacklist', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT email FROM blacklist');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch blacklist.' });
+  }
+});
 // signup POST request
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
+  const blacklisted = await pool.query('SELECT 1 FROM blacklist WHERE email = $1', [email]);
+  if (blacklisted.rows.length > 0) {
+  return res.json({ success: false, message: 'This email is banned.' });
+}
   try {
     // Password hashed
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -74,6 +84,10 @@ app.post('/signup', async (req, res) => {
 // login POST request
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  const blacklisted = await pool.query('SELECT 1 FROM blacklist WHERE email = $1', [email]);
+  if (blacklisted.rows.length > 0) {
+  return res.json({ success: false, message: 'This account is banned.' });
+}
 
   try {
     // Get the user by email
@@ -385,6 +399,31 @@ app.get('/api/admin/user-profile', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch user profile.' });
+  }
+});
+
+app.post('/api/admin/ban-user', async (req, res) => {
+  const { email } = req.body;
+  // Prevent banning the admin
+  const adminResult = await pool.query('SELECT is_admin FROM users WHERE email = $1', [email]);
+  if (adminResult.rows[0]?.is_admin) {
+    return res.status(400).json({ success: false, message: 'Cannot ban admin user.' });
+  }
+  try {
+    await pool.query('INSERT INTO blacklist (email) VALUES ($1) ON CONFLICT DO NOTHING', [email]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to ban user.' });
+  }
+});
+
+app.post('/api/admin/unban-user', async (req, res) => {
+  const { email } = req.body;
+  try {
+    await pool.query('DELETE FROM blacklist WHERE email = $1', [email]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to unban user.' });
   }
 });
 

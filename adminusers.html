@@ -24,6 +24,7 @@
           <thead>
             <tr>
               <th>Email</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="users-tbody">
@@ -34,30 +35,77 @@
     </main>
   </div>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-  document.querySelector('.sidebar ul').addEventListener('click', function(e) {
-    const text = e.target && e.target.textContent.trim();
-    if (text === 'Manage Users') window.location.href = 'adminusers.html';
-    if (text === 'Manage Events') window.location.href = 'admin.html';
-    if (text === 'Reports') window.location.href = 'adminreport.html';
-    if (text === 'Logout') window.location.href = 'login.html';
-  });
-});
-    async function loadUsers() {
-  const res = await fetch('/api/admin/users');
-  const users = await res.json();
+async function loadUsers() {
+  // Fetch users and blacklist
+  const [usersRes, blacklistRes] = await Promise.all([
+    fetch('/api/admin/users'),
+    fetch('/api/admin/blacklist')
+  ]);
+  const users = await usersRes.json();
+  const blacklist = await blacklistRes.json();
+  const bannedEmails = blacklist.map(b => b.email);
+
   const tbody = document.getElementById('users-tbody');
   tbody.innerHTML = '';
   users.forEach(user => {
+    const isBanned = bannedEmails.includes(user.email);
     tbody.innerHTML += `
       <tr>
         <td>
           <a href="user.html?email=${encodeURIComponent(user.email)}">${user.email}</a>
         </td>
+        <td>
+          ${user.is_admin ? '' : isBanned
+            ? `<button class="unban-btn" data-email="${user.email}">Unban</button>`
+            : `<button class="ban-btn" data-email="${user.email}">Ban</button>`}
+        </td>
       </tr>
     `;
   });
+
+  // Ban buttons
+  document.querySelectorAll('.ban-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const email = this.getAttribute('data-email');
+      if (confirm(`Ban user ${email}?`)) {
+        const res = await fetch('/api/admin/ban-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert('User banned.');
+          loadUsers();
+        } else {
+          alert(result.message || 'Failed to ban user.');
+        }
+      }
+    });
+  });
+
+  // Unban buttons
+  document.querySelectorAll('.unban-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const email = this.getAttribute('data-email');
+      if (confirm(`Unban user ${email}?`)) {
+        const res = await fetch('/api/admin/unban-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert('User unbanned.');
+          loadUsers();
+        } else {
+          alert(result.message || 'Failed to unban user.');
+        }
+      }
+    });
+  });
 }
+
 document.addEventListener('DOMContentLoaded', loadUsers);
   </script>
 </body>
