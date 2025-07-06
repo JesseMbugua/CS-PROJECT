@@ -9,68 +9,79 @@
 <body>
 
   <div class="container">
-    <h1>User Profile</h1>
+  <h1>User Profile</h1>
+  <div><h2>Email:</h2> <span id="user-email"></span></div>
 
-    <section class="profile-section">
-      <h2>Update Profile</h2>
-      <form class="profile-form" enctype="multipart/form-data">
-        <div class="profile-pic-container">
-          <img src="default-avatar.png" alt="Profile Picture" id="profile-pic-preview">
-          <input type="file" id="profile-pic" accept="image/*">
-        </div>
+  <section class="profile-section">
+    <!-- ...existing profile form... -->
+  </section>
 
-        <label>Full Name:</label>
-        <input type="text" placeholder="John Doe" />
+  <section class="events-section">
+    <h2>My Created Events</h2>
+    <ul class="event-list" id="created-events-list"></ul>
+  </section>
 
-        <label>Email:</label>
-        <input type="email" placeholder="john@example.com" />
+  <section class="events-section">
+    <h2>Joined Upcoming Events</h2>
+    <ul class="event-list" id="joined-upcoming-list"></ul>
+  </section>
 
-        <label>Password:</label>
-        <input type="password" placeholder="********" />
+  <section class="events-section">
+    <h2>Joined Completed Events</h2>
+    <ul class="event-list" id="joined-completed-list"></ul>
+  </section>
 
-        <label>Bio:</label>
-        <textarea placeholder="Tell us something about you..."></textarea>
+  <!-- ...extras section... -->
+</div>
 
-        <button type="submit">Update Profile</button>
-      </form>
-    </section>
+ <script>
+function getQueryParam(name) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
 
-    <section class="events-section">
-      <h2>My Created Events</h2>
-      <ul class="event-list">
-        <li>River Cleanup - July 10, 2025</li>
-        <li>Park Restoration - July 20, 2025</li>
-      </ul>
-    </section>
+async function loadUserProfile() {
+  const emailParam = getQueryParam('email');
+  let data;
+  if (emailParam) {
+    // Admin viewing another user's profile
+    const res = await fetch('/api/admin/user-profile?email=' + encodeURIComponent(emailParam));
+    if (!res.ok) return;
+    data = await res.json();
+  } else {
+    // Normal user viewing their own profile
+    const res = await fetch('/api/user/profile');
+    if (!res.ok) return;
+    data = await res.json();
+  }
 
-    <section class="events-section">
-      <h2>Joined Upcoming Events</h2>
-      <ul class="event-list">
-        <li>Beach Sweep - August 5, 2025</li>
-        <li>Forest Debris Removal - August 15, 2025</li>
-      </ul>
-    </section>
+  // Display email
+  document.getElementById('user-email').textContent = data.email;
 
-    <section class="extras">
-      <h2>Other Options</h2>
-      <ul class="extras-list">
-        <li><a href="#">Delete My Account</a></li>
-        <li><a href="#">Log Out</a></li>
-      </ul>
-    </section>
+  // Created Events
+  const createdList = document.getElementById('created-events-list');
+  createdList.innerHTML = '';
+  data.createdEvents.forEach(ev => {
+    createdList.innerHTML += `<li>${ev.event_name} - ${ev.event_date.split('T')[0]}</li>`;
+  });
 
-  </div>
+  // Joined Upcoming Events
+  const joinedUpcomingList = document.getElementById('joined-upcoming-list');
+  joinedUpcomingList.innerHTML = '';
+  data.joinedUpcoming.forEach(ev => {
+    joinedUpcomingList.innerHTML += `<li>${ev.event_name} - ${ev.event_date.split('T')[0]}</li>`;
+  });
 
-  <script>
-    // Preview selected profile picture
-    document.getElementById("profile-pic").addEventListener("change", function(event) {
-      const reader = new FileReader();
-      reader.onload = function () {
-        document.getElementById("profile-pic-preview").src = reader.result;
-      };
-      reader.readAsDataURL(event.target.files[0]);
-    });
-  </script>
+  // Joined Completed Events
+  const joinedCompletedList = document.getElementById('joined-completed-list');
+  joinedCompletedList.innerHTML = '';
+  data.joinedCompleted.forEach(ev => {
+    joinedCompletedList.innerHTML += `<li>${ev.event_name} - ${ev.event_date.split('T')[0]}</li>`;
+  });
+}
+
+document.addEventListener('DOMContentLoaded', loadUserProfile);
+</script>
 
 </body>
 </html>

@@ -286,6 +286,101 @@ app.get('/api/admin/users', async (req, res) => {
   }
 });
 
+app.get('/api/user/profile', async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Not logged in' });
+
+    // Get user email
+    const userResult = await pool.query('SELECT email FROM users WHERE id = $1', [userId]);
+    const email = userResult.rows[0]?.email;
+
+    // Get events created by user
+    const createdEventsResult = await pool.query(
+      'SELECT event_name, event_date FROM events WHERE user_id = $1 ORDER BY event_date DESC',
+      [userId]
+    );
+
+    // Get joined events (upcoming)
+    const joinedUpcomingResult = await pool.query(
+      `SELECT e.event_name, e.event_date
+       FROM participating p
+       JOIN events e ON p.event_id = e.id
+       WHERE p.user_id = $1 AND e.event_date >= CURRENT_DATE
+       ORDER BY e.event_date ASC`,
+      [userId]
+    );
+
+    // Get joined events (completed)
+    const joinedCompletedResult = await pool.query(
+      `SELECT e.event_name, e.event_date
+       FROM participating p
+       JOIN events e ON p.event_id = e.id
+       WHERE p.user_id = $1 AND e.event_date < CURRENT_DATE
+       ORDER BY e.event_date DESC`,
+      [userId]
+    );
+
+    res.json({
+      email,
+      createdEvents: createdEventsResult.rows,
+      joinedUpcoming: joinedUpcomingResult.rows,
+      joinedCompleted: joinedCompletedResult.rows
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch profile.' });
+  }
+});
+
+app.get('/api/admin/user-profile', async (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+
+  try {
+    // Get user id by email
+    const userResult = await pool.query('SELECT id, email FROM users WHERE email = $1', [email]);
+    if (userResult.rows.length === 0) return res.status(404).json({ success: false, message: 'User not found' });
+    const userId = userResult.rows[0].id;
+
+    // Get events created by user
+    const createdEventsResult = await pool.query(
+      'SELECT event_name, event_date FROM events WHERE user_id = $1 ORDER BY event_date DESC',
+      [userId]
+    );
+
+    // Get joined events (upcoming)
+    const joinedUpcomingResult = await pool.query(
+      `SELECT e.event_name, e.event_date
+       FROM participating p
+       JOIN events e ON p.event_id = e.id
+       WHERE p.user_id = $1 AND e.event_date >= CURRENT_DATE
+       ORDER BY e.event_date ASC`,
+      [userId]
+    );
+
+    // Get joined events (completed)
+    const joinedCompletedResult = await pool.query(
+      `SELECT e.event_name, e.event_date
+       FROM participating p
+       JOIN events e ON p.event_id = e.id
+       WHERE p.user_id = $1 AND e.event_date < CURRENT_DATE
+       ORDER BY e.event_date DESC`,
+      [userId]
+    );
+
+    res.json({
+      email,
+      createdEvents: createdEventsResult.rows,
+      joinedUpcoming: joinedUpcomingResult.rows,
+      joinedCompleted: joinedCompletedResult.rows
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch user profile.' });
+  }
+});
+
 //The directory that has server.js
 app.use(express.static(__dirname));
 // Start server
