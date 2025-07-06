@@ -87,18 +87,27 @@ async function loadAdminEvents() {
   `;
   tbody.innerHTML = '';
   events.forEach(event => {
-    // Check if event is completed (event_date < today)
-    const isCompleted = new Date(event.event_date) < new Date();
-    tbody.innerHTML += `
-  <tr class="event-row" data-event-id="${event.id}" style="cursor:pointer;">
-    <td>${event.event_name}</td>
-    <td>${event.event_date.split('T')[0]}</td>
-    <td>${event.event_location}</td>
-    <td>${event.volunteers}</td>
-    <td style="text-align:center;">${isCompleted ? '✅' : '❌'}</td>
-  </tr>
-`;
-  });
+  const isCompleted = new Date(event.event_date) < new Date();
+  tbody.innerHTML += `
+    <tr class="event-row" data-event-id="${event.id}" style="cursor:pointer;">
+      <td>
+        ${event.event_name}
+        ${isCompleted && event.participants.length > 0 ? `
+          <div style="font-size:0.95em; margin-top:6px;">
+            <strong>Participants:</strong>
+            <ul style="margin:4px 0 0 16px; padding:0;">
+              ${event.participants.map(email => `<li style="list-style:disc;">${email}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+      </td>
+      <td>${event.event_date.split('T')[0]}</td>
+      <td>${event.event_location}</td>
+      <td>${event.volunteers}</td>
+      <td style="text-align:center;">${isCompleted ? '✅' : '❌'}</td>
+    </tr>
+  `;
+});
 
   document.querySelectorAll('.event-row').forEach(row => {
   row.addEventListener('click', function() {

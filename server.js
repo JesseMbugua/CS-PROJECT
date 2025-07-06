@@ -176,14 +176,29 @@ app.get('/api/events', async (req, res) => {
   const offset = parseInt(req.query.offset) || 0;
   try {
     const result = await pool.query(
-      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating AS user_email
+      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating
        FROM events
        JOIN users ON events.user_id = users.id
        ORDER BY events.created_at DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset]
     );
-    res.json(result.rows);
+    const events = result.rows;
+    for (const event of events) {
+      const isCompleted = new Date(event.event_date) < new Date();
+      if (isCompleted) {
+        const participantsResult = await pool.query(
+          `SELECT users.email FROM participating
+           JOIN users ON participating.user_id = users.id
+           WHERE participating.event_id = $1`,
+          [event.id]
+        );
+        event.participants = participantsResult.rows.map(row => row.email);
+      } else {
+        event.participants = [];
+      }
+    }
+    res.json(events);
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch events.' });
@@ -192,7 +207,8 @@ app.get('/api/events', async (req, res) => {
 
 app.get('/api/admin/events', async (req, res) => {
   try {
-    const result = await pool.query(`
+    // Get all events with volunteer count
+    const eventsResult = await pool.query(`
       SELECT 
         events.id,
         events.event_name, 
@@ -204,53 +220,32 @@ app.get('/api/admin/events', async (req, res) => {
       GROUP BY events.id, events.event_name, events.event_date, events.event_location
       ORDER BY events.event_date DESC
     `);
-    res.json(result.rows);
+
+    const events = eventsResult.rows;
+
+    // For completed events, fetch participant emails
+    for (const event of events) {
+      const isCompleted = new Date(event.event_date) < new Date();
+      if (isCompleted) {
+        const participantsResult = await pool.query(
+          `SELECT users.email FROM participating
+           JOIN users ON participating.user_id = users.id
+           WHERE participating.event_id = $1`,
+          [event.id]
+        );
+        event.participants = participantsResult.rows.map(row => row.email);
+      } else {
+        event.participants = [];
+      }
+    }
+
+    res.json(events);
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch events.' });
   }
 });
 
-// User joins an event
-app.post('/api/events/:id/join', async (req, res) => {
-  const userId = req.session.userId;
-  const eventId = parseInt(req.params.id, 10);
-
-  if (!userId) {
-    return res.status(401).json({ success: false, message: 'Not logged in' });
-  }
-
-  // Prevent joining completed events
-  const eventResult = await pool.query('SELECT event_date FROM events WHERE id = $1', [eventId]);
-  if (!eventResult.rows.length) {
-    return res.status(404).json({ success: false, message: 'Event not found.' });
-  }
-  const eventDate = new Date(eventResult.rows[0].event_date);
-  if (eventDate < new Date()) {
-    return res.status(400).json({ success: false, message: 'Cannot join a completed event.' });
-  }
-
-  try {
-    // Try to insert participation
-    const result = await pool.query(
-      'INSERT INTO participating (event_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING id',
-      [eventId, userId]
-    );
-    // Only increment if a new row was inserted
-    if (result.rowCount > 0) {
-      await pool.query(
-        'UPDATE events SET number_participating = number_participating + 1 WHERE id = $1',
-        [eventId]
-      );
-      res.json({ success: true, message: 'Joined event!' });
-    } else {
-      res.json({ success: false, message: 'You have already joined this event.' });
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Failed to join event.' });
-  }
-});
 app.get('/api/events/:id', async (req, res) => {
   const eventId = parseInt(req.params.id, 10);
   try {
@@ -264,7 +259,20 @@ app.get('/api/events/:id', async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Event not found.' });
     }
-    res.json(result.rows[0]);
+    const event = result.rows[0];
+    const isCompleted = new Date(event.event_date) < new Date();
+    if (isCompleted) {
+      const participantsResult = await pool.query(
+        `SELECT users.email FROM participating
+         JOIN users ON participating.user_id = users.id
+         WHERE participating.event_id = $1`,
+        [event.id]
+      );
+      event.participants = participantsResult.rows.map(row => row.email);
+    } else {
+      event.participants = [];
+    }
+    res.json(event);
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to fetch event.' });
   }
@@ -398,13 +406,27 @@ app.get('/api/user/profile', async (req, res) => {
 
     // Get joined events (completed)
     const joinedCompletedResult = await pool.query(
-      `SELECT e.event_name, e.event_date
-       FROM participating p
-       JOIN events e ON p.event_id = e.id
-       WHERE p.user_id = $1 AND e.event_date < CURRENT_DATE
-       ORDER BY e.event_date DESC`,
-      [userId]
-    );
+  `SELECT e.id, e.event_name, e.event_date
+   FROM participating p
+   JOIN events e ON p.event_id = e.id
+   WHERE p.user_id = $1 AND e.event_date < CURRENT_DATE
+   ORDER BY e.event_date DESC`,
+  [userId]
+);
+
+      const joinedCompleted = [];
+for (const ev of joinedCompletedResult.rows) {
+  const participantsResult = await pool.query(
+    `SELECT users.email FROM participating
+     JOIN users ON participating.user_id = users.id
+     WHERE participating.event_id = $1`,
+    [ev.id]
+  );
+  joinedCompleted.push({
+    ...ev,
+    participants: participantsResult.rows.map(row => row.email)
+  });
+}
 
     const reportsResult = await pool.query(
       'SELECT id, address, description, status FROM reports WHERE user_id = $1 ORDER BY id DESC',
@@ -412,12 +434,12 @@ app.get('/api/user/profile', async (req, res) => {
     );
 
     res.json({
-      email,
-      createdEvents: createdEventsResult.rows,
-      joinedUpcoming: joinedUpcomingResult.rows,
-      joinedCompleted: joinedCompletedResult.rows,
-      reports: reportsResult.rows
-    });
+  email,
+  createdEvents: createdEventsResult.rows,
+  joinedUpcoming: joinedUpcomingResult.rows,
+  joinedCompleted,
+  reports: reportsResult.rows
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch profile.' });
@@ -452,25 +474,38 @@ app.get('/api/admin/user-profile', async (req, res) => {
 
     // Get joined events (completed)
     const joinedCompletedResult = await pool.query(
-      `SELECT e.event_name, e.event_date
-       FROM participating p
-       JOIN events e ON p.event_id = e.id
-       WHERE p.user_id = $1 AND e.event_date < CURRENT_DATE
-       ORDER BY e.event_date DESC`,
-      [userId]
-    );
+  `SELECT e.id, e.event_name, e.event_date
+   FROM participating p
+   JOIN events e ON p.event_id = e.id
+   WHERE p.user_id = $1 AND e.event_date < CURRENT_DATE
+   ORDER BY e.event_date DESC`,
+  [userId]
+);
     const reportsResult = await pool.query(
       'SELECT id, address, description, status FROM reports WHERE user_id = $1 ORDER BY id DESC',
       [userId]
     );
 
+    const joinedCompleted = [];
+for (const ev of joinedCompletedResult.rows) {
+  const participantsResult = await pool.query(
+    `SELECT users.email FROM participating
+     JOIN users ON participating.user_id = users.id
+     WHERE participating.event_id = $1`,
+    [ev.id]
+  );
+  joinedCompleted.push({
+    ...ev,
+    participants: participantsResult.rows.map(row => row.email)
+  });
+}
     res.json({
-      email,
-      createdEvents: createdEventsResult.rows,
-      joinedUpcoming: joinedUpcomingResult.rows,
-      joinedCompleted: joinedCompletedResult.rows,
-      reports: reportsResult.rows
-    });
+  email,
+  createdEvents: createdEventsResult.rows,
+  joinedUpcoming: joinedUpcomingResult.rows,
+  joinedCompleted,
+  reports: reportsResult.rows
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch user profile.' });

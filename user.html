@@ -78,11 +78,27 @@ async function loadUserProfile() {
   });
 
   // Joined Completed Events
-  const joinedCompletedList = document.getElementById('joined-completed-list');
-  joinedCompletedList.innerHTML = '';
-  data.joinedCompleted.forEach(ev => {
-    joinedCompletedList.innerHTML += `<li>${ev.event_name} - ${ev.event_date.split('T')[0]}</li>`;
-  });
+const joinedCompletedList = document.getElementById('joined-completed-list');
+joinedCompletedList.innerHTML = '';
+data.joinedCompleted.forEach(ev => {
+  joinedCompletedList.innerHTML += `
+    <li style="background: none; padding: 0;">
+      <div class="post report-card">
+        <div class="post-body">
+          <h3 style="margin:0 0 8px 0;">${ev.event_name} - ${ev.event_date.split('T')[0]}</h3>
+          ${ev.participants && ev.participants.length > 0 ? `
+            <div style="font-size:0.95em; margin-top:6px;">
+              <strong>Participants:</strong>
+              <ul style="margin:4px 0 0 16px; padding:0;">
+                ${ev.participants.map(email => `<li style="list-style:disc;">${email}</li>`).join('')}
+              </ul>
+            </div>
+          ` : '<div style="font-size:0.95em; margin-top:6px;">No participants.</div>'}
+        </div>
+      </div>
+    </li>
+  `;
+});
   const reportsList = document.getElementById('user-reports-list');
 reportsList.innerHTML = '';
 if (data.reports && data.reports.length > 0) {
