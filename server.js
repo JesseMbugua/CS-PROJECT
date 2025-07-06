@@ -278,6 +278,60 @@ app.get('/api/events/:id', async (req, res) => {
   }
 });
 
+app.post('/api/events/:id/join', async (req, res) => {
+  const eventId = parseInt(req.params.id, 10);
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Not logged in' });
+  }
+
+  try {
+    // Check if event exists and is not completed
+    const eventResult = await pool.query(
+      'SELECT event_date FROM events WHERE id = $1',
+      [eventId]
+    );
+    
+    if (eventResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    const eventDate = new Date(eventResult.rows[0].event_date);
+    if (eventDate < new Date()) {
+      return res.status(400).json({ success: false, message: 'Cannot join completed event' });
+    }
+
+    // Check if user is already participating
+    const existingParticipation = await pool.query(
+      'SELECT 1 FROM participating WHERE event_id = $1 AND user_id = $2',
+      [eventId, userId]
+    );
+
+    if (existingParticipation.rows.length > 0) {
+      return res.status(400).json({ success: false, message: 'You are already joined to this event' });
+    }
+
+    // Add user to participating table
+    await pool.query(
+      'INSERT INTO participating (event_id, user_id) VALUES ($1, $2)',
+      [eventId, userId]
+    );
+
+    // Update the number_participating count in events table
+    await pool.query(
+      'UPDATE events SET number_participating = COALESCE(number_participating, 0) + 1 WHERE id = $1',
+      [eventId]
+    );
+
+    res.json({ success: true, message: 'Successfully joined the event!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to join event.' });
+  }
+});
+
+
 app.get('/api/events/:id/participants', async (req, res) => {
   const eventId = parseInt(req.params.id, 10);
   try {
