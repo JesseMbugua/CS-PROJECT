@@ -88,8 +88,15 @@ app.post('/login', async (req, res) => {
       const match = await bcrypt.compare(password, user.password);
       if (match) {
         req.session.userId = user.id; // Save user ID in session
-        return res.json({ success: true, message: 'Login successful!' });
-      }else {
+        req.session.isAdmin = user.is_admin; // Save admin flag in session
+
+        // Respond with admin info
+        if (user.is_admin) {
+          return res.json({ success: true, isAdmin: true, redirect: 'admin.html' });
+        } else {
+          return res.json({ success: true, isAdmin: false, redirect: 'index.html' });
+        }
+      } else {
         res.json({ success: false, message: 'Invalid login' });
       }
     } else {

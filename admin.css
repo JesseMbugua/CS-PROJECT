@@ -112,3 +112,13 @@ th, td {
 tr:hover {
   background: #f5f5f5;
 }
+
+#users-tbody a {
+  color: #222;
+  text-decoration: none;
+}
+
+#users-tbody a:hover {
+  text-decoration: underline;
+  color: #007BFF; /* Optional: blue on hover */
+}

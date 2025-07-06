@@ -30,10 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
       //JSON response from the server
       const result = await response.json();
       if (result.success) {
-        window.location.href = 'index.html'; // Redirect to homepage
-      } else {
-        alert(result.message);
+      window.location.href = result.redirect; // Redirect based on backend response
       }
+      else {
+        alert(result.message);
+}
     } catch (error) {
       alert('An error occurred during login.');
     }
