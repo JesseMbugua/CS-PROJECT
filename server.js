@@ -287,13 +287,21 @@ app.get('/api/admin/users', async (req, res) => {
 });
 
 app.get('/api/admin/reports', async (req, res) => {
-  console.log('GET /api/admin/reports called');
   try {
-    const result = await pool.query('SELECT id, photo_url, address, description FROM reports ORDER BY id DESC');
+    const result = await pool.query('SELECT id, address, description, status FROM reports ORDER BY id DESC');
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch reports.' });
+  }
+});
+
+app.post('/api/admin/report-status', async (req, res) => {
+  const { id, status } = req.body;
+  try {
+    await pool.query('UPDATE reports SET status = $1 WHERE id = $2', [status, id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update status.' });
   }
 });
 

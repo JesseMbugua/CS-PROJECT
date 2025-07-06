@@ -105,8 +105,21 @@ async function loadUsers() {
     });
   });
 }
-
-document.addEventListener('DOMContentLoaded', loadUsers);
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('.sidebar ul').addEventListener('click', function(e) {
+    const text = e.target && e.target.textContent.trim();
+    if (text === 'Manage Users') {
+      window.location.href = 'adminusers.html';
+    }
+    if (text === 'Manage Events' || text === 'Dashboard') {
+      window.location.href = 'admin.html';
+    }
+    if (text === 'Reports') {
+      window.location.href = 'adminreport.html';
+    }
+  });
+  loadUsers();
+});
   </script>
 </body>
 </html>

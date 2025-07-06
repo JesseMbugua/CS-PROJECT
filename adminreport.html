@@ -26,6 +26,7 @@
               <th>ID</th>
               <th>Address</th>
               <th>Description</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody id="reports-tbody">
@@ -36,16 +37,7 @@
     </main>
   </div>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-  document.querySelector('.sidebar ul').addEventListener('click', function(e) {
-    const text = e.target && e.target.textContent.trim();
-    if (text === 'Manage Users') window.location.href = 'adminusers.html';
-    if (text === 'Manage Events') window.location.href = 'admin.html';
-    if (text === 'Reports') window.location.href = 'adminreport.html';
-    if (text === 'Logout') window.location.href = 'login.html';
-  });
-});
-    async function loadReports() {
+   async function loadReports() {
   const res = await fetch('/api/admin/reports');
   const reports = await res.json();
   const tbody = document.getElementById('reports-tbody');
@@ -56,8 +48,28 @@
         <td>${report.id}</td>
         <td>${report.address}</td>
         <td>${report.description}</td>
+        <td>
+          <select class="status-select" data-id="${report.id}">
+            <option value="Unresolved" ${report.status === 'Unresolved' ? 'selected' : ''}>Unresolved</option>
+            <option value="Pending" ${report.status === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Resolved" ${report.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+          </select>
+        </td>
       </tr>
     `;
+  });
+
+  // Add event listeners for status changes
+  document.querySelectorAll('.status-select').forEach(select => {
+    select.addEventListener('change', async function() {
+      const id = this.getAttribute('data-id');
+      const status = this.value;
+      await fetch('/api/admin/report-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+    });
   });
 }
     document.addEventListener('DOMContentLoaded', loadReports);
