@@ -15,7 +15,7 @@
   <li id="reports-btn">Reports</li>
 </ul>
     </aside>
-    <main class="main-content">
+    <main class="feed" id="reports-container">
       <header>
         <h1>All Reports</h1>
       </header>
@@ -36,32 +36,36 @@
       </section>
     </main>
   </div>
-  <script>
-   async function loadReports() {
+   <script>
+async function loadReports() {
   const res = await fetch('/api/admin/reports');
   const reports = await res.json();
-  const tbody = document.getElementById('reports-tbody');
-  tbody.innerHTML = '';
+  const container = document.getElementById('reports-container');
+  container.innerHTML = '';
   reports.forEach(report => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${report.id}</td>
-        <td>${report.address}</td>
-        <td>${report.description}</td>
-        <td>
-          <select class="status-select" data-id="${report.id}">
-            <option value="Unresolved" ${report.status === 'Unresolved' ? 'selected' : ''}>Unresolved</option>
-            <option value="Pending" ${report.status === 'Pending' ? 'selected' : ''}>Pending</option>
-            <option value="Resolved" ${report.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
-          </select>
-        </td>
-      </tr>
+    container.innerHTML += `
+      <div class="post report-card" data-id="${report.id}">
+        <div class="post-body">
+          <h2>Report #${report.id}</h2>
+          <div class="meta">
+            <span>📍 ${String(report.address).replace(/^{|}$/g, '')}</span>
+            <span>By: ${report.reporter_email || 'Unknown'}</span>
+            <span>Status: 
+              <select class="status-select" data-id="${report.id}">
+                <option value="Unresolved" ${report.status === 'Unresolved' ? 'selected' : ''}>Unresolved</option>
+                <option value="Pending" ${report.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="Resolved" ${report.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+              </select>
+            </span>
+          </div>
+          <p>${report.description}</p>
+        </div>
+      </div>
     `;
   });
-
-  // Add event listeners for status changes
+  // Status change
   document.querySelectorAll('.status-select').forEach(select => {
-    select.addEventListener('change', async function() {
+    select.addEventListener('change', async function(e) {
       const id = this.getAttribute('data-id');
       const status = this.value;
       await fetch('/api/admin/report-status', {
@@ -69,10 +73,30 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status })
       });
+      e.stopPropagation();
     });
   });
 }
-    document.addEventListener('DOMContentLoaded', loadReports);
-  </script>
+
+// Only ONE DOMContentLoaded handler!
+document.addEventListener('DOMContentLoaded', () => {
+  // Sidebar navigation
+  document.querySelector('.sidebar ul').addEventListener('click', function(e) {
+    const text = e.target && e.target.textContent.trim();
+    if (text === 'Manage Users') {
+      window.location.href = 'adminusers.html';
+    }
+    if (text === 'Manage Events' || text === 'Dashboard') {
+      window.location.href = 'admin.html';
+    }
+    if (text === 'Reports') {
+      window.location.href = 'adminreport.html';
+    }
+  });
+
+  // Load reports
+  loadReports();
+});
+</script>
 </body>
 </html>

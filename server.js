@@ -134,15 +134,16 @@ app.post('/logout', (req, res) => {
 app.post('/report', upload.single('photo'), async (req, res) => {
   const { address, description } = req.body;
   const photo_url = req.file ? '/uploads/' + req.file.filename : null;
+  const userId = req.session.userId; // Get user ID from session
 
   try {
     await pool.query(
-      'INSERT INTO reports (photo_url, address, description) VALUES ($1, $2, $3)',
-      [photo_url, address, description]
+      'INSERT INTO reports (photo_url, address, description, user_id) VALUES ($1, $2, $3, $4)',
+      [photo_url, address, description, userId]
     );
     res.json({ success: true, message: 'Report submitted!' });
   } catch (err) {
-    console.error(err); // <-- Check this output
+    console.error(err);
     res.status(500).json({ success: false, message: 'Failed to submit report.' });
   }
 });
@@ -286,12 +287,38 @@ app.get('/api/admin/users', async (req, res) => {
   }
 });
 
+//all reports
 app.get('/api/admin/reports', async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, address, description, status FROM reports ORDER BY id DESC');
+    const result = await pool.query(`
+      SELECT reports.id, reports.address, reports.description, reports.status, users.email AS reporter_email
+      FROM reports
+      LEFT JOIN users ON reports.user_id = users.id
+      ORDER BY reports.id DESC
+    `);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to fetch reports.' });
+  }
+});
+
+//single report
+app.get('/api/admin/report/:id', async (req, res) => {
+  const reportId = req.params.id;
+  try {
+    const result = await pool.query(
+      `SELECT reports.*, users.email AS reporter_email
+       FROM reports
+       LEFT JOIN users ON reports.user_id = users.id
+       WHERE reports.id = $1`,
+      [reportId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Report not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch report.' });
   }
 });
 
@@ -316,6 +343,7 @@ app.get('/api/admin/users', async (req, res) => {
 });
 
 app.get('/api/user/profile', async (req, res) => {
+  console.log('Session userId:', req.session.userId); // Add this line
   try {
     const userId = req.session.userId;
     if (!userId) return res.status(401).json({ success: false, message: 'Not logged in' });
@@ -350,11 +378,17 @@ app.get('/api/user/profile', async (req, res) => {
       [userId]
     );
 
+    const reportsResult = await pool.query(
+      'SELECT id, address, description, status FROM reports WHERE user_id = $1 ORDER BY id DESC',
+      [userId]
+    );
+
     res.json({
       email,
       createdEvents: createdEventsResult.rows,
       joinedUpcoming: joinedUpcomingResult.rows,
-      joinedCompleted: joinedCompletedResult.rows
+      joinedCompleted: joinedCompletedResult.rows,
+      reports: reportsResult.rows
     });
   } catch (err) {
     console.error(err);
@@ -397,12 +431,17 @@ app.get('/api/admin/user-profile', async (req, res) => {
        ORDER BY e.event_date DESC`,
       [userId]
     );
+    const reportsResult = await pool.query(
+      'SELECT id, address, description, status FROM reports WHERE user_id = $1 ORDER BY id DESC',
+      [userId]
+    );
 
     res.json({
       email,
       createdEvents: createdEventsResult.rows,
       joinedUpcoming: joinedUpcomingResult.rows,
-      joinedCompleted: joinedCompletedResult.rows
+      joinedCompleted: joinedCompletedResult.rows,
+      reports: reportsResult.rows
     });
   } catch (err) {
     console.error(err);

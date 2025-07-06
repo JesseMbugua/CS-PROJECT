@@ -27,11 +27,16 @@
   </section>
 
   <section class="events-section">
-    <h2>Joined Completed Events</h2>
-    <ul class="event-list" id="joined-completed-list"></ul>
-  </section>
+  <h2>Joined Completed Events</h2>
+  <ul class="event-list" id="joined-completed-list"></ul>
+</section>
 
-  <!-- ...extras section... -->
+  <section class="events-section">
+  <h2>My Reports</h2>
+  <ul class="event-list" id="user-reports-list"></ul>
+</section>
+
+
 </div>
 
  <script>
@@ -78,7 +83,29 @@ async function loadUserProfile() {
   data.joinedCompleted.forEach(ev => {
     joinedCompletedList.innerHTML += `<li>${ev.event_name} - ${ev.event_date.split('T')[0]}</li>`;
   });
+  const reportsList = document.getElementById('user-reports-list');
+reportsList.innerHTML = '';
+if (data.reports && data.reports.length > 0) {
+  data.reports.forEach(report => {
+    reportsList.innerHTML += `
+      <li style="background: none; padding: 0;">
+        <div class="post report-card">
+          <div class="post-body">
+            <div class="meta">
+              <span><strong>📍 ${String(report.address).replace(/^{|}$/g, '')}</strong></span>
+              <span style="float:right;">Status: ${report.status}</span>
+            </div>
+            <p>${report.description}</p>
+          </div>
+        </div>
+      </li>
+    `;
+  });
+} else {
+  reportsList.innerHTML = '<li>No reports submitted.</li>';
+}HTML = '<li>No reports submitted.</li>';
 }
+
 
 document.addEventListener('DOMContentLoaded', loadUserProfile);
 </script>

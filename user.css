@@ -111,3 +111,27 @@ h2 {
 .extras-list a:hover {
   text-decoration: underline;
 }
+
+.post.report-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  transition: box-shadow 0.2s;
+}
+.post.report-card:hover {
+  box-shadow: 0 4px 12px rgba(30,136,229,0.15);
+}
+.post-body h2 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  color: #777;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
