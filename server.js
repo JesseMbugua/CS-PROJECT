@@ -220,6 +220,16 @@ app.post('/api/events/:id/join', async (req, res) => {
     return res.status(401).json({ success: false, message: 'Not logged in' });
   }
 
+  // Prevent joining completed events
+  const eventResult = await pool.query('SELECT event_date FROM events WHERE id = $1', [eventId]);
+  if (!eventResult.rows.length) {
+    return res.status(404).json({ success: false, message: 'Event not found.' });
+  }
+  const eventDate = new Date(eventResult.rows[0].event_date);
+  if (eventDate < new Date()) {
+    return res.status(400).json({ success: false, message: 'Cannot join a completed event.' });
+  }
+
   try {
     // Try to insert participation
     const result = await pool.query(
@@ -239,6 +249,24 @@ app.post('/api/events/:id/join', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to join event.' });
+  }
+});
+app.get('/api/events/:id', async (req, res) => {
+  const eventId = parseInt(req.params.id, 10);
+  try {
+    const result = await pool.query(
+      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating
+       FROM events
+       JOIN users ON events.user_id = users.id
+       WHERE events.id = $1`,
+      [eventId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Event not found.' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch event.' });
   }
 });
 

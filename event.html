@@ -17,6 +17,11 @@
   </main>
 
   <script>
+
+    function getQueryParam(name) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
  let limit = 10;      // Number of events to load per request
 let offset = 0;      // Start at the first event
 let loading = false; // Prevent multiple loads
@@ -25,29 +30,44 @@ async function loadEvents() {
   if (loading) return;
   loading = true;
 
-  const res = await fetch(`/api/events?limit=${limit}&offset=${offset}`);
-  const events = await res.json();
+  const eventId = getQueryParam('id');
+  let events = [];
+  if (eventId) {
+    // Fetch only the selected event
+    const res = await fetch(`/api/events/${eventId}`);
+    const event = await res.json();
+    if (event && event.id) events = [event];
+  } else {
+    // Fetch all events as before
+    const res = await fetch(`/api/events?limit=${limit}&offset=${offset}`);
+    events = await res.json();
+  }
 
   const container = document.getElementById('events-container');
- events.forEach(event => {
-  container.innerHTML += `
-    <div class="post">
-      <img src="${event.event_image_url ? event.event_image_url : 'default-event.png'}" class="post-image" alt="Event Image">
-      <div class="post-body">
-        <h2>${event.event_name}</h2>
-        <div class="meta">
-          <span>📍 ${event.event_location}</span>
-          <span>📅 ${event.event_date} ${event.event_time ? '⏰ ' + event.event_time : ''}</span>
-          <span>👤 ${event.user_email}</span>
-          <span>👥 ${event.number_participating || 0} joined</span>
+  container.innerHTML = '';
+  events.forEach(event => {
+    const isCompleted = new Date(event.event_date) < new Date();
+    container.innerHTML += `
+      <div class="post">
+        <img src="${event.event_image_url ? event.event_image_url : 'default-event.png'}" class="post-image" alt="Event Image">
+        <div class="post-body">
+          <h2>${event.event_name}</h2>
+          <div class="meta">
+            <span>📍 ${event.event_location}</span>
+            <span>📅 ${event.event_date} ${event.event_time ? '⏰ ' + event.event_time : ''}</span>
+            <span>👤 ${event.user_email}</span>
+            <span>👥 ${event.number_participating || 0} joined</span>
+          </div>
+          ${isCompleted 
+            ? `<button class="join-btn" data-event-id="${event.id}" disabled style="background:#ccc;cursor:not-allowed;">Event Completed</button>`
+            : `<button class="join-btn" data-event-id="${event.id}">Join Event</button>`
+          }
         </div>
-        <button class="join-btn" data-event-id="${event.id}">Join Event</button>
       </div>
-    </div>
-  `;
-});
+    `;
+  });
 
-  if (events.length > 0) {
+  if (!eventId && events.length > 0) {
     offset += limit;
   }
 

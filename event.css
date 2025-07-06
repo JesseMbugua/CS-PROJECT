@@ -100,12 +100,13 @@ header {
 }
 
 .post-body {
-  padding: 15px;
+  padding: 22px 18px 18px 18px;
 }
 
 .post-body h2 {
-  margin: 0 0 8px;
-  font-size: 1.2rem;
+  margin: 0 0 14px 0;
+  font-size: 1.4rem;
+  font-weight: bold;
 }
 
 .post-body p {
@@ -115,10 +116,21 @@ header {
 
 .meta {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
   color: #777;
-  font-size: 0.85rem;
-  margin-top: 10px;
+  font-size: 1rem;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.meta span {
+  display: flex;
+  align-items: center;
+  min-width: 120px;
+  margin-bottom: 4px;
+  word-break: break-word;
 }
 
 .join-btn {
