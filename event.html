@@ -47,6 +47,9 @@ async function loadEvents() {
   container.innerHTML = '';
   events.forEach(event => {
   const isCompleted = new Date(event.event_date) < new Date();
+  // Format the date to show only YYYY-MM-DD
+  const formattedDate = new Date(event.event_date).toISOString().split('T')[0];
+  
   container.innerHTML += `
     <div class="post">
       <img src="${event.event_image_url ? event.event_image_url : 'default-event.png'}" class="post-image" alt="Event Image">
@@ -54,7 +57,7 @@ async function loadEvents() {
         <h2>${event.event_name}</h2>
         <div class="meta">
           <span>📍 ${event.event_location}</span>
-          <span>📅 ${event.event_date} ${event.event_time ? '⏰ ' + event.event_time : ''}</span>
+          <span>📅 ${formattedDate} ${event.event_time ? '⏰ ' + event.event_time : ''}</span>
           <span>👤 ${event.user_email}</span>
           <span>👥 ${event.number_participating || 0} joined</span>
         </div>

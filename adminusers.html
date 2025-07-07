@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Users - Street Cleanup</title>
+  <title>Admin Users - Event Cleanup Organizer</title>
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
@@ -13,6 +13,11 @@
   <li id="manage-users-btn" class="active-dashboard">Manage Users</li>
   <li id="manage-events-btn">Manage Events</li>
   <li id="reports-btn">Reports</li>
+  <li class="logout-item">
+    <button id="logoutBtn" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+  </li>
 </ul>
     </aside>
     <main class="main-content">
@@ -105,6 +110,13 @@ async function loadUsers() {
     });
   });
 }
+
+// Logout function
+async function logout() {
+  await fetch('/logout', { method: 'POST', credentials: 'include' });
+  window.location.href = 'login.html';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.sidebar ul').addEventListener('click', function(e) {
     const text = e.target && e.target.textContent.trim();
@@ -118,6 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'adminreport.html';
     }
   });
+  
+  // Logout button handler
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+  
   loadUsers();
 });
   </script>

@@ -23,13 +23,7 @@
       <li><a href="event.html"><i class="fas fa-eye"></i> View Events</a></li>
       <li><a href="report.html"><i class="fas fa-exclamation-triangle"></i> Report</a></li>
       <li><a href="user.html"><i class="fas fa-user"></i> User Profile</a></li>
-      <li>
-  <form id="logoutForm" style="margin:0;">
-    <button type="submit" style="background:none;border:none;color:#007BFF;cursor:pointer;width:100%;text-align:left;padding:10px 0 10px 40px;">
-      <i class="fas fa-sign-out-alt"></i> Logout
-    </button>
-  </form>
-</li>
+      <li><a href="#" id="logoutLink"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
     </ul>
   </div>
 
@@ -68,7 +62,7 @@
 </footer>
 
 <script>
-document.getElementById('logoutForm').addEventListener('submit', async function(e) {
+document.getElementById('logoutLink').addEventListener('click', async function(e) {
   e.preventDefault();
   await fetch('/logout', { method: 'POST', credentials: 'include' });
   window.location.href = 'login.html';

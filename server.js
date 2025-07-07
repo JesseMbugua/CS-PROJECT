@@ -174,9 +174,16 @@ app.post('/create-event', upload.single('eventImage'), async (req, res) => {
 app.get('/api/events', async (req, res) => {
   const limit = parseInt(req.query.limit) || 5;
   const offset = parseInt(req.query.offset) || 0;
-  const currentUserId = req.session.userId; // Get current user ID
+  const currentUserId = req.session.userId;
   
   try {
+    // Check if current user is admin
+    let isAdmin = false;
+    if (currentUserId) {
+      const userResult = await pool.query('SELECT is_admin FROM users WHERE id = $1', [currentUserId]);
+      isAdmin = userResult.rows[0]?.is_admin || false;
+    }
+
     const result = await pool.query(
       `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating, events.user_id
        FROM events
@@ -199,8 +206,8 @@ app.get('/api/events', async (req, res) => {
       } else {
         event.participants = [];
       }
-      // Add flag to indicate if current user can delete this event
-      event.canDelete = currentUserId && event.user_id === currentUserId;
+      // Add flag to indicate if current user can delete this event (admin or creator)
+      event.canDelete = currentUserId && (isAdmin || event.user_id === currentUserId);
     }
     res.json(events);
   } catch (err) {
@@ -255,6 +262,13 @@ app.get('/api/events/:id', async (req, res) => {
   const currentUserId = req.session.userId;
   
   try {
+    // Check if current user is admin
+    let isAdmin = false;
+    if (currentUserId) {
+      const userResult = await pool.query('SELECT is_admin FROM users WHERE id = $1', [currentUserId]);
+      isAdmin = userResult.rows[0]?.is_admin || false;
+    }
+
     const result = await pool.query(
       `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating, events.user_id
        FROM events
@@ -278,13 +292,14 @@ app.get('/api/events/:id', async (req, res) => {
     } else {
       event.participants = [];
     }
-    // Add flag to indicate if current user can delete this event
-    event.canDelete = currentUserId && event.user_id === currentUserId;
+    // Add flag to indicate if current user can delete this event (admin or creator)
+    event.canDelete = currentUserId && (isAdmin || event.user_id === currentUserId);
     res.json(event);
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to fetch event.' });
   }
 });
+
 
 app.post('/api/events/:id/join', async (req, res) => {
   const eventId = parseInt(req.params.id, 10);
@@ -608,7 +623,7 @@ app.delete('/api/events/:id', async (req, res) => {
   }
 
   try {
-    // Check if event exists and user is the creator
+    // Check if event exists
     const eventResult = await pool.query(
       'SELECT user_id FROM events WHERE id = $1',
       [eventId]
@@ -618,7 +633,16 @@ app.delete('/api/events/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
-    if (eventResult.rows[0].user_id !== userId) {
+    // Check if user is admin or event creator
+    const userResult = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [userId]
+    );
+
+    const isAdmin = userResult.rows[0]?.is_admin;
+    const isEventCreator = eventResult.rows[0].user_id === userId;
+
+    if (!isAdmin && !isEventCreator) {
       return res.status(403).json({ success: false, message: 'You can only delete your own events' });
     }
 
@@ -634,7 +658,6 @@ app.delete('/api/events/:id', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to delete event.' });
   }
 });
-
 //The directory that has server.js
 app.use(express.static(__dirname));
 // Start server
