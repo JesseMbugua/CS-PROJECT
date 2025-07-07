@@ -8,36 +8,39 @@
 </head>
 <body>
 
+  <header class="user-header">
+    <button class="home-btn" onclick="window.location.href='index.html'">Home</button>
+    <h1 class="user-title">User Profile</h1>
+  </header>
+
   <div class="container">
-  <h1>User Profile</h1>
-  <div><h2>Email:</h2> <span id="user-email"></span></div>
+    <div><h2>Email:</h2> <span id="user-email"></span></div>
 
-  <section class="profile-section">
-    <!-- ...existing profile form... -->
-  </section>
+    <section class="profile-section">
+      <!-- ...existing profile form... -->
+    </section>
 
-  <section class="events-section">
-    <h2>My Created Events</h2>
-    <ul class="event-list" id="created-events-list"></ul>
-  </section>
+    <section class="events-section">
+      <h2>My Created Events</h2>
+      <ul class="event-list" id="created-events-list"></ul>
+    </section>
 
-  <section class="events-section">
-    <h2>Joined Upcoming Events</h2>
-    <ul class="event-list" id="joined-upcoming-list"></ul>
-  </section>
+    <section class="events-section">
+      <h2>Joined Upcoming Events</h2>
+      <ul class="event-list" id="joined-upcoming-list"></ul>
+    </section>
 
-  <section class="events-section">
-  <h2>Joined Completed Events</h2>
-  <ul class="event-list" id="joined-completed-list"></ul>
-</section>
+    <section class="events-section">
+      <h2>Joined Completed Events</h2>
+      <ul class="event-list" id="joined-completed-list"></ul>
+    </section>
 
-  <section class="events-section">
-  <h2>My Reports</h2>
-  <ul class="event-list" id="user-reports-list"></ul>
-</section>
+    <section class="events-section">
+      <h2>My Reports</h2>
+      <ul class="event-list" id="user-reports-list"></ul>
+    </section>
 
-
-</div>
+  </div>
 
  <script>
 function getQueryParam(name) {
@@ -119,9 +122,8 @@ if (data.reports && data.reports.length > 0) {
   });
 } else {
   reportsList.innerHTML = '<li>No reports submitted.</li>';
-}HTML = '<li>No reports submitted.</li>';
 }
-
+}
 
 document.addEventListener('DOMContentLoaded', loadUserProfile);
 </script>

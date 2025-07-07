@@ -434,12 +434,25 @@ app.get('/api/events/:id/participants', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch participants.' });
   }
 });
+
 app.get('/api/admin/stats', async (req, res) => {
   try {
     const usersResult = await pool.query('SELECT COUNT(*) FROM users');
-    const upcomingResult = await pool.query('SELECT COUNT(*) FROM events WHERE event_date >= CURRENT_DATE');
+    
+    // Get current date and time in ISO format
+    const now = new Date().toISOString();
+    
+    // Count upcoming events (event_date > current timestamp)
+    const upcomingResult = await pool.query('SELECT COUNT(*) FROM events WHERE event_date::timestamp > $1::timestamp', [now]);
+    
     const reportsResult = await pool.query('SELECT COUNT(*) FROM reports');
-    const completedResult = await pool.query('SELECT COUNT(*) FROM events WHERE event_date < CURRENT_DATE');
+    
+    // Count completed events (event_date <= current timestamp)  
+    const completedResult = await pool.query('SELECT COUNT(*) FROM events WHERE event_date::timestamp <= $1::timestamp', [now]);
+
+    console.log('Current time:', now); // Debug log
+    console.log('Upcoming count:', upcomingResult.rows[0].count); // Debug log
+    console.log('Completed count:', completedResult.rows[0].count); // Debug log
 
     res.json({
       totalUsers: parseInt(usersResult.rows[0].count, 10),

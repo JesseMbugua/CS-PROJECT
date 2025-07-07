@@ -135,3 +135,47 @@ h2 {
   font-size: 0.95rem;
   margin-bottom: 10px;
 }
+.user-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: white;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.home-btn {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 18px 38px;
+  border-radius: 8px;
+  border: none;
+  background: #007BFF;
+  color: white;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+  transition: background 0.3s ease;
+}
+
+.home-btn:hover {
+  background: #0056b3;
+}
+
+.user-title {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+/* Adjust container to account for header */
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 15px;
+}
