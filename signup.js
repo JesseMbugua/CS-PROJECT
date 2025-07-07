@@ -26,7 +26,18 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const result = await response.json();
 
-      alert(result.message);
+      if (result.success) {
+        if (result.showRecovery && result.recoveryPhrase) {
+          // Show the recovery phrase modal
+          document.getElementById('recoveryPhraseDisplay').textContent = result.recoveryPhrase;
+          document.getElementById('recoveryModal').style.display = 'flex';
+        } else {
+          alert('Signup successful!');
+          window.location.href = 'login.html';
+        }
+      } else {
+        alert(result.message);
+      }
 
     } catch (error) {
       console.error('Error:', error);
@@ -35,3 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 });
+
+function closeModal() {
+  document.getElementById('recoveryModal').style.display = 'none';
+  window.location.href = 'login.html';
+}

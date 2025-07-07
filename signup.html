@@ -7,17 +7,130 @@
     <link rel="stylesheet" href="login-signup.css">
 </head>
 <body>
-    <form class="form" id ="signupForm">
+    <form class="form" id="signupForm">
         <div class="header">Signup</div>
         <div class="inputs">
-            <input name ="email" placeholder="Email" class="input" type="text">
-            <input name ="password" placeholder="Password" class="input" type="password">
-            <input name ="confirmPassword" placeholder="Confirm Password" class="input" type="password">
+            <input name="email" placeholder="Email" class="input" type="text" required>
+            <input name="password" placeholder="Password" class="input" type="password" required>
+            <input name="confirmPassword" placeholder="Confirm Password" class="input" type="password" required>
         <button class="sigin-btn">Create Account</button>
         <p class="signup-link">Already have an account? <a href="login.html">Login</a></p>
         </div>
     </form>
-</body>
-<script src="signup.js"></script>
 
+    <!-- Recovery Phrase Modal -->
+    <div id="recoveryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>⚠️ Important: Save Your Recovery Phrase</h2>
+            <p>Your account has been created successfully!</p>
+            <p><strong>Please save these 5 words safely:</strong></p>
+            <div id="recoveryPhraseDisplay" class="recovery-phrase"></div>
+            <p><small>You will need these exact 5 words to reset your password if you forget it. Please write them down and keep them safe!</small></p>
+            <button onclick="closeModal()" class="sigin-btn">I've Saved It</button>
+        </div>
+    </div>
+
+    <style>
+    .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 15px;
+        max-width: 500px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .recovery-phrase {
+        background-color: #f0f8ff;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 8px;
+        font-family: 'Arial', sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        color: #2c3e50;
+        border: 2px solid #3498db;
+        word-spacing: 10px;
+        letter-spacing: 1px;
+    }
+
+    .modal-content h2 {
+        color: #e74c3c;
+        margin-bottom: 15px;
+    }
+
+    .modal-content p {
+        margin: 10px 0;
+        color: #333;
+    }
+    </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const password = formData.get('password');
+    const confirmPassword = formData.get('confirmPassword');
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+
+    const data = {
+      email: formData.get('email'),
+      password: password
+    };
+
+    try {
+      const response = await fetch('/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+        credentials: 'include'
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        if (result.showRecovery && result.recoveryPhrase) {
+          // Show the recovery phrase modal
+          document.getElementById('recoveryPhraseDisplay').textContent = result.recoveryPhrase;
+          document.getElementById('recoveryModal').style.display = 'flex';
+        } else {
+          alert('Signup successful!');
+          window.location.href = 'login.html';
+        }
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      alert('An error occurred during signup.');
+    }
+  });
+});
+
+function closeModal() {
+  document.getElementById('recoveryModal').style.display = 'none';
+  window.location.href = 'login.html';
+}
+</script>
+</body>
 </html>

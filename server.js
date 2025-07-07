@@ -49,6 +49,25 @@ app.use(session({
   saveUninitialized: true
 }));
 
+// Function to generate a random 5-word recovery phrase
+function generateRecoveryPhrase() {
+  const words = [
+    'apple', 'beach', 'cloud', 'dream', 'eagle', 'forest', 'garden', 'honey', 'island', 'jungle',
+    'kitten', 'lemon', 'mountain', 'nature', 'ocean', 'planet', 'quiet', 'river', 'sunset', 'tiger',
+    'umbrella', 'valley', 'wonder', 'yellow', 'zebra', 'anchor', 'bright', 'castle', 'dolphin', 'energy',
+    'falcon', 'galaxy', 'harmony', 'inspire', 'journey', 'knight', 'liberty', 'melody', 'noble', 'orchid',
+    'phoenix', 'quantum', 'rainbow', 'sparrow', 'thunder', 'unique', 'victory', 'wisdom', 'xylem', 'zephyr'
+  ];
+  
+  const selectedWords = [];
+  for (let i = 0; i < 5; i++) {
+    const randomIndex = Math.floor(Math.random() * words.length);
+    selectedWords.push(words[randomIndex]);
+  }
+  
+  return selectedWords.join(' ');
+}
+
 app.get('/api/admin/blacklist', async (req, res) => {
   try {
     const result = await pool.query('SELECT email FROM blacklist');
@@ -62,22 +81,66 @@ app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
   const blacklisted = await pool.query('SELECT 1 FROM blacklist WHERE email = $1', [email]);
   if (blacklisted.rows.length > 0) {
-  return res.json({ success: false, message: 'This email is banned.' });
-}
+    return res.json({ success: false, message: 'This email is banned.' });
+  }
+  
   try {
     // Password hashed
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Generate recovery phrase
+    const recoveryPhrase = generateRecoveryPhrase();
 
-    // Insert the new user into the database with the hashed password
+    // Insert the new user into the database with the hashed password and recovery phrase
     await pool.query(
-      'INSERT INTO users (email, password) VALUES ($1, $2)',
-      [email, hashedPassword]
+      'INSERT INTO users (email, password, recovery_phrase) VALUES ($1, $2, $3)',
+      [email, hashedPassword, recoveryPhrase]
     );
 
-    res.json({ success: true, message: 'Signup successful!' });
+    res.json({ 
+      success: true, 
+      message: 'Signup successful!', 
+      recoveryPhrase: recoveryPhrase,
+      showRecovery: true
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Signup failed.' });
+  }
+});
+
+app.post('/forgot-password', async (req, res) => {
+  const { email, recoveryPhrase, newPassword } = req.body;
+  
+  try {
+    // Check if user exists and recovery phrase matches
+    const result = await pool.query(
+      'SELECT id, recovery_phrase FROM users WHERE email = $1',
+      [email]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.json({ success: false, message: 'Email not found.' });
+    }
+    
+    const user = result.rows[0];
+    if (user.recovery_phrase.toLowerCase() !== recoveryPhrase.toLowerCase()) {
+      return res.json({ success: false, message: 'Invalid recovery phrase.' });
+    }
+    
+    // Hash the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    
+    // Update the password
+    await pool.query(
+      'UPDATE users SET password = $1 WHERE id = $2',
+      [hashedNewPassword, user.id]
+    );
+    
+    res.json({ success: true, message: 'Password reset successful!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Password reset failed.' });
   }
 });
 
