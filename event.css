@@ -46,21 +46,6 @@ header {
   font-weight: bold;
 }
 
-.join-btn {
-  margin-top: 10px;
-  padding: 10px 24px;
-  background: #43a047;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  font-weight: bold;
-}
-.join-btn:hover {
-  background: #388e3c;
-}
-
 .feed {
   max-width: 600px;
   margin: 20px auto;
@@ -133,10 +118,14 @@ header {
   word-break: break-word;
 }
 
-.join-btn {
-  display: block;
-  width: 100%;
+.event-actions {
+  display: flex;
+  gap: 15px;
   margin-top: 15px;
+}
+
+.join-btn {
+  flex: 1;
   padding: 10px;
   background-color: #1e88e5;
   color: white;
@@ -149,4 +138,20 @@ header {
 
 .join-btn:hover {
   background-color: #1669bb;
+}
+
+.delete-btn {
+  flex: 1;
+  padding: 10px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.delete-btn:hover {
+  background: #c82333;
 }

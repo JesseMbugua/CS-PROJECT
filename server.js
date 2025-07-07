@@ -174,9 +174,11 @@ app.post('/create-event', upload.single('eventImage'), async (req, res) => {
 app.get('/api/events', async (req, res) => {
   const limit = parseInt(req.query.limit) || 5;
   const offset = parseInt(req.query.offset) || 0;
+  const currentUserId = req.session.userId; // Get current user ID
+  
   try {
     const result = await pool.query(
-      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating
+      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating, events.user_id
        FROM events
        JOIN users ON events.user_id = users.id
        ORDER BY events.created_at DESC
@@ -197,6 +199,8 @@ app.get('/api/events', async (req, res) => {
       } else {
         event.participants = [];
       }
+      // Add flag to indicate if current user can delete this event
+      event.canDelete = currentUserId && event.user_id === currentUserId;
     }
     res.json(events);
   } catch (err) {
@@ -248,9 +252,11 @@ app.get('/api/admin/events', async (req, res) => {
 
 app.get('/api/events/:id', async (req, res) => {
   const eventId = parseInt(req.params.id, 10);
+  const currentUserId = req.session.userId;
+  
   try {
     const result = await pool.query(
-      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating
+      `SELECT events.id, event_name, event_date, event_time, event_location, event_image_url, users.email AS user_email, events.number_participating, events.user_id
        FROM events
        JOIN users ON events.user_id = users.id
        WHERE events.id = $1`,
@@ -272,6 +278,8 @@ app.get('/api/events/:id', async (req, res) => {
     } else {
       event.participants = [];
     }
+    // Add flag to indicate if current user can delete this event
+    event.canDelete = currentUserId && event.user_id === currentUserId;
     res.json(event);
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to fetch event.' });
@@ -588,6 +596,42 @@ app.post('/api/admin/unban-user', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to unban user.' });
+  }
+});
+
+app.delete('/api/events/:id', async (req, res) => {
+  const eventId = parseInt(req.params.id, 10);
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Not logged in' });
+  }
+
+  try {
+    // Check if event exists and user is the creator
+    const eventResult = await pool.query(
+      'SELECT user_id FROM events WHERE id = $1',
+      [eventId]
+    );
+    
+    if (eventResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    if (eventResult.rows[0].user_id !== userId) {
+      return res.status(403).json({ success: false, message: 'You can only delete your own events' });
+    }
+
+    // Delete from participating table first (foreign key constraint)
+    await pool.query('DELETE FROM participating WHERE event_id = $1', [eventId]);
+    
+    // Delete the event
+    await pool.query('DELETE FROM events WHERE id = $1', [eventId]);
+
+    res.json({ success: true, message: 'Event deleted successfully!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to delete event.' });
   }
 });
 
